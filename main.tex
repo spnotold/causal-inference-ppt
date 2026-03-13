@@ -24,23 +24,23 @@
 %%%%%%%%%%%%%%%%%%%%%
 
 %%%%----首页信息设置----%%%%
-\title[浙江大学 Beamer 模板]{浙江大学 Beamer 模板}
-\subtitle{——这里是副标题}			
+\title[End-To-End Causal Effect Estimation]{End-To-End Causal Effect Estimation from Unstructured Natural Language Data}
+\subtitle{Dhawan, Cotta, Ullrich, Krishnan, Maddison. NeurIPS 2024}			
 %%%%----标题设置
 
-\author[Guang Touge]{
-  光头哥 \\\medskip
-  {\small \url{chenqiyuan1012@foxmail.com}} \\
-  {\small \url{https://www.zju.edu.cn/}}}
+\author[童泽远]{
+  汇报人：童泽远 \\\medskip
+  PPT制作：李宇航（问题、相关工作、方法、挑战）\\
+  牛靖北（实验、思考）}
 %%%%----个人信息设置
   
 \institute[IOPP]{
-  计算机学院 \\ 
+  课程：《因果推理》 \\
   浙江大学}
 %%%%----机构信息
 
-\date[Aug. 31 2023]{
-  2023年8月31日}
+\date[Mar. 17 2026]{
+  2026年3月17日}
 %%%%----日期信息
   
 \begin{document}
@@ -59,44 +59,975 @@
 \section{问题}
 \begin{frame}
 	\frametitle{问题}
-	\begin{itemize}
-		\item 研究背景
-		\item 核心问题是什么？
-		\item 为什么这个问题重要？
-	\end{itemize}
+	\begin{block}{研究背景}
+		传统因果推断通常需要结构化表格数据 $(X,T,Y)$：协变量、treatment 和 outcome 都要直接可见。
+		但真实世界中大量信息存在于病历、社交媒体帖子、患者报告等非结构化文本中。
+	\end{block}
+
+	\begin{alertblock}{核心问题}
+		在\textbf{不直接访问结构化表格数据}的情况下，能否仅根据自然语言报告 $R$，
+		端到端估计平均处理效应
+		\[
+		\tau=\mathbb{E}[Y(1)-Y(0)]\;?
+		\]
+	\end{alertblock}
+
+	\begin{exampleblock}{为什么重要}
+		\begin{itemize}
+			\item 随机对照试验昂贵、耗时，很多场景下不可行
+			\item 观察性文本数据更丰富，且可能覆盖被传统数据忽略的人群
+			\item 如果文本也能支持因果估计，就能更快挖掘真实世界证据
+		\end{itemize}
+	\end{exampleblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{结构化表格数据 vs 非结构化数据}
+	\begin{columns}[T]
+		\begin{column}{0.48\textwidth}
+			\begin{block}{结构化表格数据}
+				\begin{itemize}
+					\item 形式清晰：每行一个个体，每列一个变量
+					\item 典型变量：协变量 $X$、treatment $T$、outcome $Y$
+					\item 优点：可直接使用 IPW、OI 等标准因果方法
+					\item 局限：依赖预先设计字段，很多真实信息会被压缩或遗漏
+				\end{itemize}
+			\end{block}
+		\end{column}
+		\begin{column}{0.48\textwidth}
+			\begin{block}{非结构化自然语言数据}
+				\begin{itemize}
+					\item 形式开放：病历、社交媒体帖子、患者报告
+					\item 信息更丰富，更贴近患者真实体验与结局
+					\item 可能恢复失访结局，并覆盖被表格数据忽略的人群
+					\item 难点：信息分散在文本里，无法直接套用标准因果估计器
+				\end{itemize}
+			\end{block}
+		\end{column}
+	\end{columns}
+
+	\begin{alertblock}{本文的切入点}
+		传统因果推断擅长处理结构化表格数据；本文要解决的是，如何把非结构化文本转化为可用于估计 ATE 的信息。
+	\end{alertblock}
 \end{frame}
 
 %%%%========== 第二部分：相关工作 ==========%%%%
 \section{相关工作}
 \begin{frame}
-	\frametitle{相关工作}
-	\begin{itemize}
-		\item 已有方法一
-		\item 已有方法二
-		\item 已有方法的局限性
-	\end{itemize}
+	\frametitle{相关工作：LLM 因果推理已被广泛探索（1）}
+	\small
+	\begin{block}{直接提问因果关系 / 因果图构建}
+		\begin{itemize}
+			\item K{\i}c{\i}man et al., \textit{Causal reasoning and large language models: Opening a new frontier for causality}, \textbf{TMLR 2023}
+			\item Naik et al., \textit{Applying large language models for causal structure learning in non small cell lung cancer}, \textbf{IEEE ICHI 2024}
+			\item Antonucci et al., \textit{Zero-shot causal graph extrapolation from text via LLMs}, \textbf{AAAI XAI4Sci Workshop 2024}
+			\item Arsenyan \& Shahnazaryan, \textit{Large language models for biomedical causal graph construction}, \textbf{BioNLP Workshop 2024}
+		\end{itemize}
+	\end{block}
 \end{frame}
 
-%%%%========== 第三部分：挑战/创新 ==========%%%%
-\section{挑战/创新}
 \begin{frame}
-	\frametitle{挑战与创新}
-	\begin{itemize}
-		\item 现有方法面临的挑战
-		\item 本文的创新点
-		\item 主要贡献
-	\end{itemize}
+	\frametitle{相关工作：LLM 因果推理已被广泛探索（2）}
+	\small
+	\begin{block}{关于 LLM 因果能力的讨论与反思}
+		\begin{itemize}
+			\item Pearl, \textit{Judea Pearl, AI, and causality: What role do statisticians play?}, \textbf{Amstat News 2023}
+			\item Willig et al., \textit{Causal parrots: Large language models may talk causality but are not causal}, \textbf{TMLR 2023}
+			\item Jin et al., \textit{Can large language models infer causation from correlation?}, \textbf{ICLR 2024}
+			\item Vashishtha et al., \textit{Causal inference using LLM-guided discovery}, \textbf{AAAI Workshop 2024}
+		\end{itemize}
+	\end{block}
 \end{frame}
 
-%%%%========== 第四部分：方法 ==========%%%%
+\begin{frame}
+	\frametitle{相关工作：已有方法暴露出的三个问题}
+	\footnotesize
+	\begin{alertblock}{问题 1：隐含因果模型不可控}
+		用户实际上受限于 LLM 训练中学到的因果模型，但并不知道模型依据什么回答。
+		相关讨论：Pearl (\textbf{Amstat News 2023}), Willig et al. (\textbf{TMLR 2023})。
+	\end{alertblock}
+
+	\begin{alertblock}{问题 2：对 prompt 高度敏感}
+		同一个因果问题，换一种问法可能得到不同结论。
+		相关工作：Long et al., \textit{Can large language models build causal graphs?}, \textbf{NeurIPS CML4Impact Workshop 2022}。
+	\end{alertblock}
+
+	\begin{alertblock}{问题 3：易混淆相关与因果}
+		LLM 往往难以区分 correlation 和 causation，逐对检查因果关系还可能导出无效因果图。
+		相关工作：Jin et al. (\textbf{ICLR 2024}), Vashishtha et al. (\textbf{AAAI Workshop 2024})。
+	\end{alertblock}
+
+	\begin{exampleblock}{本文的切入点}
+		本文换了一个方向：\textbf{不直接让 LLM 输出因果结论}，
+		而是先恢复因果估计所需的结构化概率信息。
+	\end{exampleblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{本文的不同（1）：不是“直接问 LLM 因果关系”}
+	\begin{columns}[T]
+		\begin{column}{0.48\textwidth}
+			\begin{block}{已有黑盒式做法}
+				\begin{itemize}
+					\item 直接问：$X$ 会不会导致 $Y$？
+					\item 或让 LLM 直接判断因果边/构建因果图
+					\item 输出本身就是“因果结论”
+					\item 因果逻辑主要隐含在模型内部
+				\end{itemize}
+			\end{block}
+		\end{column}
+		\begin{column}{0.48\textwidth}
+			\begin{block}{本文 NATURAL}
+				\begin{itemize}
+					\item 输入是一组自然语言报告 $R$
+					\item 让 LLM 近似恢复 $P(X,T,Y\mid R)$ 等条件分布
+					\item 再接入 IPW、OI 等标准因果估计器
+					\item 输出是可解释的 ATE 估计，而非一句“有/没有因果”
+				\end{itemize}
+			\end{block}
+		\end{column}
+	\end{columns}
+
+	\begin{alertblock}{核心思想}
+		LLM 在本文中扮演的是“从文本提取概率信息的工具”，而不是“直接替代因果推断本身”的黑盒裁判。
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{本文的不同（2）：与其他文本因果方法相比}
+	\begin{block}{区别一：Zero-shot，不需要任务特定标注数据}
+		许多文本因果方法需要先标注一批样本，再训练专门的提取器或分类器。
+		NATURAL 直接使用现成 LLM + prompting，不需要为每个新任务重新标注和训练。
+	\end{block}
+
+	\begin{block}{区别二：不把“文本用词本身”当作因果对象}
+		很多方法研究的是文本措辞、情感词、主题等如何进入因果分析。
+		而 NATURAL 不关心患者具体怎么表述，只把文本当作信息载体，
+		目标是从中恢复协变量 $X$、treatment $T$、outcome $Y$ 的分布。
+	\end{block}
+
+	\begin{exampleblock}{一句话概括}
+		本文要做的不是“让 LLM 学会因果推理”，而是“让 LLM 把文本翻译成经典因果推断可以处理的输入”。
+	\end{exampleblock}
+\end{frame}
+
+%%%%========== 第三部分：方法 ==========%%%%
 \section{方法}
 \begin{frame}
-	\frametitle{方法}
+	\frametitle{论文设定：变量设定}
+	\small
+	\begin{block}{基本变量设定}
+		论文在 Neyman-Rubin 潜在结局框架下讨论因果效应，并假设处理和结局都是二元变量。
+	\end{block}
+
 	\begin{itemize}
-		\item 整体框架
-		\item 关键模块/算法
-		\item 理论分析
+		\item 潜在结局：$Y(1)$ 表示“接受 treatment 时的结果”，$Y(0)$ 表示“不接受 treatment 时的结果”
+		\item 处理：$T \in \{0,1\}$，可理解为“吃药 / 不吃药”
+		\item 结局：$Y \in \{0,1\}$，可理解为“好转 / 未好转”
 	\end{itemize}
+
+	\begin{exampleblock}{这样设定的原因}
+		先在最简单的二元情形下定义 ATE、推导 IPW/OI 以及 NATURAL 估计器，便于理论分析与实验验证。
+	\end{exampleblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{论文设定：ATE 与观测结局}
+	\small
+	\begin{block}{平均处理效应（ATE）}
+		\[
+		\tau=\mathbb{E}[Y(1)-Y(0)]
+		\]
+		表示总体中“所有人接受 treatment”与“所有人不接受 treatment”之间的平均结果差异。
+	\end{block}
+
+	\begin{block}{现实中真正观测到的结局}
+		\[
+		Y=TY(1)+(1-T)Y(0)
+		\]
+		即：如果 $T=1$，我们只能看到 $Y(1)$；如果 $T=0$，我们只能看到 $Y(0)$。
+	\end{block}
+
+	\begin{itemize}
+		\item 这正是因果推断的核心难点：每个人只能看到一个现实结果，另一个反事实结果不可观测
+		\item 在随机实验中，处理分配是随机的，估计 ATE 相对直接
+		\item 在观察性数据中，处理不是随机分配的，因此需要额外假设和估计方法
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{论文设定：观察性数据中的两个经典假设}
+	\small
+	在观察性研究里，处理不是随机分配的，所以要想估计平均处理效应（ATE），需要额外假设。
+
+	\begin{block}{假设 1：强可忽略性（Strong Ignorability）}
+		\[
+		(Y(0),Y(1)) \perp\!\!\!\perp T \mid X
+		\]
+		给定协变量 $X$ 后，处理分配 $T$ 与潜在结局独立。
+		直观上：只要控制了 $X$，接受 treatment 和不接受 treatment 的人就是可比的。
+	\end{block}
+
+	\begin{block}{假设 2：正值性（Positivity）}
+		\[
+		0 < P(T=t \mid X=x) < 1
+		\]
+		对于每一种协变量取值 $x$，都必须同时存在接受 treatment 和不接受 treatment 的样本。
+		直观上：否则就无法在这一类人中比较 treatment 的效果。
+	\end{block}
+
+	\begin{alertblock}{两个假设分别保证什么}
+		强可忽略性解决“有没有遗漏混杂”的问题；正值性解决“数据里能不能做比较”的问题。
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{经典方法 1：逆倾向得分加权（IPW）}
+	\small
+	\begin{block}{倾向得分}
+		\[
+		e(x)=P(T=1 \mid X=x)
+		\]
+		表示在给定协变量 $X=x$ 时，一个个体接受 treatment 的概率。
+	\end{block}
+
+	\begin{block}{IPW 估计量}
+		\[
+		\hat{\tau}_{\text{IPW}}=\frac{1}{n}\sum_{i=1}^{n}\frac{T_iY_i}{\hat{e}(X_i)}
+		-\frac{(1-T_i)Y_i}{1-\hat{e}(X_i)}
+		\]
+	\end{block}
+
+	\begin{itemize}
+		\item 对接受 treatment 的样本，用 $\frac{1}{\hat e(X_i)}$ 加权
+		\item 对未接受 treatment 的样本，用 $\frac{1}{1-\hat e(X_i)}$ 加权
+		\item 公式形式上看起来是“加权后的处理组均值减去加权后的对照组均值”
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{经典方法 1：逆倾向得分加权（IPW）的直观理解}
+	\small
+	\begin{itemize}
+		\item 核心目标：重新平衡两组样本，使处理组和对照组在协变量分布上更接近
+		\item 如果某类人本来很少接受 treatment，那么一旦接受了 treatment，就应被赋予更大权重
+		\item 如果某类人本来很少出现在对照组，那么留在对照组的样本也应被赋予更大权重
+		\item 这样做是为了抵消“谁更容易被 treatment”带来的混杂偏差
+	\end{itemize}
+
+	\begin{alertblock}{统计性质}
+		其中 $\hat{e}(x)$ 是对真实倾向得分 $P(T=1\mid X=x)$ 的估计：
+		\begin{itemize}
+			\item 如果 $\hat e(x)$ 就是真实倾向得分，那么 $\hat{\tau}_{\text{IPW}}$ 是 $\tau$ 的无偏估计
+			\item 如果 $\hat e(x)$ 是由样本估计出来的，则在样本量足够大时它是一致估计
+		\end{itemize}
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{经典方法 2：结果插补（OI）}
+	\small
+	\begin{block}{基本思想}
+		OI 先学习结局模型，再用它补全每个个体在 $T=1$ 和 $T=0$ 下的潜在结局。
+	\end{block}
+
+	\begin{block}{OI 估计量}
+		\[
+		\hat{\tau}_{\text{OI}}=\frac{1}{n}\sum_{i=1}^{n}\hat{\tau}(X_i,1)-\hat{\tau}(X_i,0)
+		\]
+		其中
+		\[
+		\hat{\tau}(x,t)\approx P(Y=1 \mid X=x,T=t)
+		\]
+	\end{block}
+
+	\begin{itemize}
+		\item 这里 $\hat{\tau}(x,t)$ 不是 ATE，而是一个结局模型
+		\item 它近似的是：给定协变量 $X=x$ 和处理状态 $T=t$ 时，好结果发生的概率
+		\item $\hat{\tau}(X_i,1)$：第 $i$ 个人接受 treatment 时的预测结局
+		\item $\hat{\tau}(X_i,0)$：第 $i$ 个人不接受 treatment 时的预测结局
+		\item 二者之差表示该个体的估计处理效应；再对所有个体取平均，就得到 ATE 的估计
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{经典方法 2：结果插补（OI）的直观理解}
+	\small
+	\begin{itemize}
+		\item OI 的关键不在于重新加权，而在于先学一个 outcome model
+		\item 这个模型负责补全每个人在 treatment 和 control 下本来观测不到的反事实结局
+		\item 所以 OI 本质上是在“先补全反事实，再做人群平均”
+	\end{itemize}
+
+	\begin{exampleblock}{和 IPW 的区别}
+		\begin{itemize}
+			\item IPW 重点估计的是 treatment 机制：$P(T=1\mid X=x)$
+			\item OI 重点估计的是 outcome 机制：$P(Y=1\mid X=x,T=t)$
+		\end{itemize}
+	\end{exampleblock}
+
+	\begin{alertblock}{统计性质}
+		如果结局模型估计准确，则 $\hat{\tau}_{\text{OI}}$ 可以无偏估计 ATE。
+		换句话说，OI 通过“补全反事实结果”来估计处理效应。
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{从传统设定到 NATURAL}
+	\Large
+	\begin{center}
+		以上为传统设定。若要从观察性的、非结构化的自然语言报告 $R_i$ 中估计 ATE，\\[0.8em]
+		NATURAL 还需要额外假设。
+	\end{center}
+\end{frame}
+
+\begin{frame}
+	\frametitle{NATURAL 的额外假设（1）：自然语言报告数据}
+	\footnotesize
+	\begin{block}{假设 3}
+		作者假设每个个体的数据可写成联合分布
+		\[
+		P(X,T,Y,R)
+		\]
+		其中：
+		\begin{itemize}
+			\item $X,T,Y$ 是常规观察性数据
+			\item $R$ 是与该个体相关的一段自然语言报告
+		\end{itemize}
+	\end{block}
+
+	\begin{block}{样本假设}
+		并且可以获得来自同一总体的 i.i.d. 报告样本
+		\[
+		\{R_i\}_{i=1}^n
+		\]
+	\end{block}
+
+	\begin{alertblock}{直观理解}
+		文本报告不是孤立的，而是和个体的 $(X,T,Y)$ 一起生成的；
+		虽然我们直接看到的是文本，但它确实携带了和因果变量有关的信息。
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{NATURAL 的额外假设（2）：可访问真实观察条件分布}
+	\footnotesize
+	\begin{block}{假设 4}
+		给定报告 $R=r$，我们可以：
+		\begin{itemize}
+			\item 直接计算
+			\[
+			P(X=x,T=t,Y=y \mid R=r)
+			\]
+			\item 或先从
+			\[
+			P(X=x \mid R=r)
+			\]
+			采样，再计算
+			\[
+			P(T=t,Y=y \mid R=r,X=x)
+			\]
+		\end{itemize}
+	\end{block}
+
+	\begin{alertblock}{直观理解}
+		虽然没有直接看到表格数据 $(X,T,Y)$，但可以通过文本 $R$ 间接恢复它们的真实条件分布。
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{NATURAL 的额外假设（2）：这意味着什么}
+	\footnotesize
+	\begin{exampleblock}{核心含义}
+		本质上，作者假设文本足够有信息，能够作为结构化因果变量的代理。
+	\end{exampleblock}
+
+	\begin{alertblock}{为什么说这是较强的假设}
+		\begin{itemize}
+			\item 如果报告几乎把 $X,T,Y$ 都写出来了，这个假设比较合理
+			\item 如果报告很模糊、信息很少，这个假设就会更强，甚至不现实
+		\end{itemize}
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{理论方法：NATURAL Full（理想化版本）}
+	\small
+	\begin{block}{基本设定}
+		给定报告样本 $\{R_i\}_{i=1}^n$ 和条件分布 $P(X=x,T=t,Y=y \mid R=r)$，
+		作者构造 NATURAL 的理想化估计器。
+	\end{block}
+
+	\begin{block}{核心恒等式}
+		\[
+		\begin{aligned}
+		\tau
+		&= \mathbb{E}_{X,T,Y}\left[\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}\right] \\
+		&= \mathbb{E}_R\left[\mathbb{E}_{X,T,Y \mid R}\left[\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}\right]\right]
+		\end{aligned}
+		\]
+	\end{block}
+
+	\begin{itemize}
+		\item 这一步本质上是把原来的 IPW 表达式，改写成“先对报告 $R$ 条件化，再对报告取平均”
+		\item 可以先固定一份报告 $R$，计算该报告下隐含的 $(X,T,Y)$ 的平均 IPW 值
+		\item 再对所有报告取平均，就得到整体的 ATE
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{理论方法：NATURAL Full 的 Monte Carlo 估计}
+	\small
+	\begin{block}{估计量}
+		\[
+		\hat{\tau}_{\text{N-Full}}
+		=
+		\frac{1}{n}\sum_{i=1}^{n}\sum_{x,t,y}
+		P(X=x,T=t,Y=y \mid R_i)
+		\left[
+		\frac{ty}{\hat{e}_{\text{N-Full}}(x)}
+		-
+		\frac{(1-t)y}{1-\hat{e}_{\text{N-Full}}(x)}
+		\right]
+		\]
+	\end{block}
+
+	\begin{itemize}
+		\item 对每份报告 $R_i$，枚举所有可能的 $(x,t,y)$
+		\item 用 $P(X,T,Y \mid R_i)$ 作为权重，计算该报告的期望 IPW 贡献
+		\item 再对所有报告平均，得到 ATE 的估计
+	\end{itemize}
+
+	\begin{alertblock}{为什么说它是“理想化版本”}
+		\begin{itemize}
+			\item 它要求我们知道完整的 $P(X,T,Y \mid R)$
+			\item 当协变量 $X$ 维度很高时，需要枚举所有 $(x,t,y)$，计算开销会很大
+		\end{itemize}
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{理论方法：NATURAL IPW（混合版本）}
+	\small
+	\begin{block}{核心思想}
+		NATURAL IPW 不再枚举所有 $(X,T,Y)$，而是先对 $X$ 采样，再对 $(T,Y)$ 求条件期望。
+	\end{block}
+
+	\begin{block}{核心公式}
+		\[
+		\tau
+		=
+		\mathbb{E}_{R,X}
+		\left[
+		\mathbb{E}_{T,Y \mid R,X}
+		\left[
+		\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}
+		\right]
+		\right]
+		\]
+	\end{block}
+
+	\begin{itemize}
+		\item 先对每份报告 $R_i$ 从 $P(X \mid R_i)$ 中采样一个 $X_i$
+		\item 得到增广数据 $(R_i,X_i)$
+		\item 再根据 $P(T,Y \mid R_i,X_i)$ 计算该样本的平均 IPW 贡献
+	\end{itemize}
+
+	\begin{alertblock}{与 NATURAL Full 的区别}
+		NATURAL Full 要枚举所有 $(X,T,Y)$；NATURAL IPW 只对 $X$ 采样，因此计算更省。
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{理论方法：NATURAL IPW 的估计量}
+	\footnotesize
+	\begin{block}{ATE 估计量}
+		\[
+		\hat{\tau}_{\text{N-IPW}}
+		=
+		\frac{1}{n}\sum_{i=1}^{n}\sum_{t,y}
+		P(T=t,Y=y \mid R_i,X_i)
+		\left[
+		\frac{ty}{\hat{e}_{\text{N-IPW}}(X_i)}
+		-
+		\frac{(1-t)y}{1-\hat{e}_{\text{N-IPW}}(X_i)}
+		\right]
+		\]
+	\end{block}
+
+	\begin{itemize}
+		\item 对每份报告，只随机补一个 $X_i$
+		\item 对 $T,Y$ 的 4 种可能情况按条件概率加权
+		\item 最后对所有样本平均，得到 ATE 估计
+	\end{itemize}
+
+	\begin{block}{倾向得分估计}
+		\[
+		\hat{e}_{\text{N-IPW}}(x)
+		=
+		\frac{\sum_{i=1}^{n}P(T=1 \mid R_i,X_i)\mathbb{I}(X_i=x)}
+		{\sum_{i=1}^{n}\mathbb{I}(X_i=x)}
+		\]
+	\end{block}
+
+	\begin{exampleblock}{公式含义}
+		把所有满足 $X_i=x$ 的样本治疗概率 $P(T=1 \mid R_i,X_i)$ 取平均，作为 $e(x)$ 的估计。
+	\end{exampleblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{理论方法：NATURAL OI（混合版本）}
+	\footnotesize
+	\begin{block}{核心思想}
+		NATURAL OI 延续了经典 OI 的思路：先估计结局模型，再比较同一个个体在 $T=1$ 和 $T=0$ 下的预测结局差异。
+	\end{block}
+
+	\begin{block}{核心目标}
+		\[
+		P(Y=1 \mid T=t,X=x)
+		\]
+		也就是：对于特征为 $x$、处理状态为 $t$ 的个体，好结果发生的概率。
+	\end{block}
+
+	\begin{block}{作者的改写}
+		\[
+		P(Y=1 \mid T=t,X=x)
+		=
+		\frac{\mathbb{E}_{R,X,T}[P(Y=1 \mid R,X,T)\mathbb{I}(X=x,T=t)]}
+		{\mathbb{E}_{R,X,T}[\mathbb{I}(X=x,T=t)]}
+		\]
+	\end{block}
+
+	\begin{itemize}
+		\item 先在所有样本里挑出满足 $(X=x,T=t)$ 的那一类人
+		\item 对这些人，利用文本报告 $R$ 计算其好结果概率 $P(Y=1 \mid R,X,T)$
+		\item 再把这些概率做平均，就得到 $P(Y=1 \mid X=x,T=t)$
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{理论方法：NATURAL OI 的结局预测器}
+	\small
+	\begin{block}{增广数据}
+		作者不直接拥有表格数据，而是对每份报告 $R_i$ 从 $P(X,T \mid R_i)$ 中采样，得到增广数据 $(R_i,X_i,T_i)$。
+	\end{block}
+
+	\begin{block}{结局预测器}
+		\[
+		\hat{\tau}_{\text{N-OI}}(x,t)
+		=
+		\frac{\sum_{i=1}^{n}P(Y=1 \mid R_i,X_i,T_i)\mathbb{I}(X_i=x,T_i=t)}
+		{\sum_{i=1}^{n}\mathbb{I}(X_i=x,T_i=t)}
+		\]
+	\end{block}
+
+	\begin{itemize}
+		\item 在所有补出来满足 $(X_i=x,T_i=t)$ 的样本中
+		\item 平均它们对应的好结果概率 $P(Y=1 \mid R_i,X_i,T_i)$
+		\item 把这个平均值当作 $\hat{\tau}_{\text{N-OI}}(x,t)$，也就是结局模型的估计
+	\end{itemize}
+
+	\begin{exampleblock}{关于指示函数 $\mathbb{I}(X_i=x,T_i=t)$}
+		它只是一个筛选器：当样本满足 $X_i=x$ 且 $T_i=t$ 时取 1，否则取 0。
+	\end{exampleblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{理论方法：NATURAL OI 的最终 ATE 估计}
+	\small
+	\begin{block}{最终估计量}
+		\[
+		\hat{\tau}_{\text{N-OI}}
+		=
+		\frac{1}{n}\sum_{i=1}^{n}\hat{\tau}_{\text{N-OI}}(X_i,1)-\hat{\tau}_{\text{N-OI}}(X_i,0)
+		\]
+	\end{block}
+
+	\begin{itemize}
+		\item 对每个个体，固定它的特征 $X_i$
+		\item 预测它在 treatment 下的结局 $\hat{\tau}_{\text{N-OI}}(X_i,1)$
+		\item 再预测它在 control 下的结局 $\hat{\tau}_{\text{N-OI}}(X_i,0)$
+		\item 两者相减，得到该个体的估计处理效应
+		\item 再对所有个体平均，得到 ATE
+	\end{itemize}
+
+	\begin{alertblock}{和 NATURAL IPW 的区别}
+		\begin{itemize}
+			\item NATURAL IPW 重点估计的是倾向得分：$e(x)=P(T=1 \mid X=x)$
+			\item NATURAL OI 重点估计的是结局模型：$P(Y=1 \mid X=x,T=t)$
+			\item 前者通过重新加权消除偏差，后者通过补全反事实来估计效应
+		\end{itemize}
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{理论方法：NATURAL Monte Carlo（纯采样版本）}
+	\small
+	\begin{block}{核心思想}
+		NATURAL Monte Carlo 进一步减少解析计算，直接对每份报告 $R_i$ 从条件分布
+		\[
+		P(X,T,Y \mid R_i)
+		\]
+		中采样一个完整样本 $(X_i,T_i,Y_i)$。
+	\end{block}
+
+	\begin{itemize}
+		\item 不再枚举所有可能的 $(X,T,Y)$
+		\item 也不再只对部分变量采样、其余变量做条件期望
+		\item 而是直接按概率随机生成一条完整的“伪表格记录” $(X_i,T_i,Y_i)$
+	\end{itemize}
+
+	\begin{block}{得到的结果}
+		对所有报告都这样做后，就得到一个合成表格数据集
+		\[
+		\{(X_i,T_i,Y_i)\}_{i=1}^{n}
+		\]
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\frametitle{理论方法：NATURAL Monte Carlo 的作用与定位}
+	\footnotesize
+	\begin{itemize}
+		\item 有了合成表格数据集后，就可以直接套用标准 ATE 估计器
+		\item 如果代入 IPW，就得到 N-MC IPW
+		\item 如果代入 OI，就得到 N-MC OI
+	\end{itemize}
+
+	\begin{exampleblock}{直观理解}
+		NATURAL Monte Carlo 就是先把文本报告“翻译”为表格数据，再用普通因果推理方法估计 ATE。
+	\end{exampleblock}
+
+	\begin{block}{与前面方法的区别}
+		\begin{itemize}
+			\item NATURAL Full：对 $(X,T,Y)$ 全部枚举
+			\item NATURAL IPW：只对 $X$ 采样
+			\item NATURAL OI：对 $(X,T)$ 采样
+			\item NATURAL Monte Carlo：对 $(X,T,Y)$ 全部采样
+		\end{itemize}
+	\end{block}
+
+	\begin{alertblock}{优点与代价}
+		优点是实现简单、计算更省；代价是会引入更多 Monte Carlo 随机误差。
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{理论方法：基于 Inclusion Criteria 的条件 ATE}
+	\small
+	\begin{block}{条件 ATE 的定义}
+		前面讨论的是总体 ATE，这里讨论的是某个子人群上的 ATE。设 $\mathcal{I}$ 表示由治疗前协变量 $X$ 定义的纳入标准（inclusion criteria），则
+		\[
+		\tau(\mathcal{I})=\mathbb{E}[Y(1)-Y(0)\mid X \in \mathcal{I}]
+		\]
+	\end{block}
+
+	\begin{itemize}
+		\item 也就是：只在满足纳入标准 $X \in \mathcal{I}$ 的人群中，计算平均处理效应
+		\item 例如，只研究某一特定年龄段、病情阶段或基线条件的人群
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{理论方法：条件 ATE 的作者写法与直观解释}
+	\footnotesize
+	\begin{block}{作者的写法}
+		\[
+		\tau(\mathcal{I})
+		=
+		\mathbb{E}_R
+		\left[
+		\frac{P(X \in \mathcal{I}\mid R)}{P(X \in \mathcal{I})}
+		\mathbb{E}_{X,T,Y}
+		\left[
+		\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}
+		\Big| X \in \mathcal{I},R
+		\right]
+		\right]
+		\]
+	\end{block}
+
+	\begin{itemize}
+		\item 先看一份报告 $R$
+		\item 判断这份报告对应的人有多大概率满足纳入标准，即 $P(X \in \mathcal{I}\mid R)$
+		\item 如果一份报告更像目标子人群，它就应该有更大的权重
+		\item 然后只在 $X \in \mathcal{I}$ 的前提下，计算其 IPW 贡献
+		\item 最后对所有报告加权平均，得到条件 ATE
+	\end{itemize}
+
+	\begin{exampleblock}{关键权重的含义}
+		\[
+		\frac{P(X \in \mathcal{I}\mid R)}{P(X \in \mathcal{I})}
+		\]
+		可以理解为：这份报告相对于总体平均水平，有多像我们关心的那类人。
+	\end{exampleblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{理论方法：条件版 NATURAL IPW 估计量}
+	\footnotesize
+	\begin{block}{条件版 NATURAL IPW 估计量}
+		\[
+		\hat{\tau}(\mathcal{I})
+		=
+		\sum_{i=1}^{n}
+		\frac{P(X \in \mathcal{I}\mid R_i)}{\sum_{i=1}^{n}P(X \in \mathcal{I}\mid R_i)}
+		\sum_{j=1}^{m}\frac{1}{m}
+		\mathbb{E}_{T,Y\mid X_{ij},R_i}
+		\left[
+		\frac{TY}{e(X_{ij})}-\frac{(1-T)Y}{1-e(X_{ij})}
+		\right]
+		\]
+		\end{block}
+
+	\begin{itemize}
+		\item 先过滤掉那些不可能满足纳入标准的报告，即 $P(X \in \mathcal{I}\mid R_i)=0$
+		\item 对剩余报告，只从“满足纳入标准”的条件分布 $P(X \mid R_i, X \in \mathcal{I})$ 中采样 $X_{ij}$
+		\item 再按报告属于目标子人群的可能性 $P(X \in \mathcal{I}\mid R_i)$ 加权
+		\item 实践中作者取 $m=1$，即每份报告只采样一次
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{工程方法：使用大语言模型实现 NATURAL 估计器}
+	\footnotesize
+	\begin{block}{这一节的重点}
+		这一节不是提出新的因果估计公式，而是说明：前面理论里需要的条件分布，现实中准备怎样用 LLM 去近似。
+	\end{block}
+
+	\begin{block}{作者的基本想法}
+		\begin{itemize}
+			\item LLM 在大量真实世界文本上训练过
+			\item 因此它可能学到“文本报告 $R$ 与结构化变量 $(X,T,Y)$ 之间的关系”
+			\item 通过合适的 prompting，LLM 也许可以近似假设 4 需要的条件分布，例如 $P(X,T,Y \mid R)$
+		\end{itemize}
+	\end{block}
+
+	\begin{alertblock}{这一节和前面理论部分的关系}
+		\begin{itemize}
+			\item 第 3 节讲的是：如果能从文本得到 $P(X,T,Y \mid R)$、$P(X \mid R)$、$P(T,Y \mid R,X)$，就能估计 ATE
+			\item 第 4 节讲的是：实际中怎样通过 LLM 得到这些分布的近似值
+			\item 假设 3 和假设 4：希望通过文本数据处理和 LLM prompting 来尽量满足
+			\item 假设 1 和假设 2：仍然必须由领域专家保证，LLM 不能替代因果识别假设
+		\end{itemize}
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{工程方法：过滤以匹配假设 3}
+	\small
+	\begin{block}{目标}
+		作者先不急着估计 ATE，而是先把原始文本过滤成一批尽量符合假设 3 的报告样本 $R_i$。
+	\end{block}
+
+	\begin{block}{四个过滤步骤}
+		\begin{itemize}
+			\item 初始过滤：删除无信息文本，如被删帖子、过短文本、机器人内容、完全不含研究关键词的帖子
+			\item 相关性过滤：用 LLM 判断报告是否和当前研究问题相关，不相关就删除
+			\item Treatment-Outcome 过滤：只保留同时提到目标 treatment 和 outcome 的报告
+			\item Inclusion Criteria 过滤已知协变量：删除那些已知协变量明确不满足纳入标准的报告
+		\end{itemize}
+	\end{block}
+
+	\begin{alertblock}{前 3 个过滤各自解决什么问题}
+		\begin{itemize}
+			\item 第 1 个解决“垃圾文本太多”的问题
+			\item 第 2 个解决“文本和研究主题不相关”的问题
+			\item 第 3 个解决“虽然相关，但没提到 treatment 或 outcome，无法用于因果估计”的问题
+		\end{itemize}
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{工程方法：第 4 个过滤为什么最关键（1）}
+	\footnotesize
+	\begin{block}{作者的做法}
+		\begin{itemize}
+			\item 先让 LLM 从每条报告中抽取协变量集 $X_i$
+			\item 如果某个协变量无法确定，就记为 \texttt{Unknown}
+			\item 只要某个“已知”的协变量明确违反纳入标准，就删掉这条报告
+			\item 如果只是看不出来，则暂时保留
+		\end{itemize}
+	\end{block}
+
+	\begin{block}{核心原则}
+		\begin{itemize}
+			\item 明确不符合纳入标准的，删掉
+			\item 不确定但仍可能符合的，保留
+		\end{itemize}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\frametitle{工程方法：第 4 个过滤为什么最关键（2）}
+	\footnotesize
+	\begin{exampleblock}{为什么要这样做}
+		很多真实文本并不会把所有协变量都写全。如果要求每条报告都把纳入标准写得非常完整，会丢掉太多样本；但如果明知某条报告不符合纳入标准还保留，又会污染目标子人群。
+	\end{exampleblock}
+
+	\begin{block}{因此第 4 个过滤的目标不是}
+		\begin{itemize}
+			\item 不是“只保留完全确定满足标准的人”
+		\end{itemize}
+	\end{block}
+
+	\begin{block}{真正要做到的是}
+		\begin{itemize}
+			\item 确保留下来的报告对目标人群仍然有非零概率
+			\item 避免把明确不属于目标子人群的报告混进来
+		\end{itemize}
+	\end{block}
+
+	\begin{alertblock}{一句话理解}
+		第 4 个过滤是在做“资格预筛选”：删掉肯定不符合的人，保留可能符合的人。
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{工程方法：采样和计算条件概率以匹配假设 4}
+	\small
+	\begin{block}{目标}
+		给定通过过滤阶段的报告集 $\{R_i\}_{i=1}^n$，下一步使用 LLM 来提取计算 NATURAL 估计器所需的样本和条件分布。
+	\end{block}
+
+	\begin{block}{要得到的核心对象}
+		\[
+		P_{\text{LLM}}(X,T,Y \mid R)
+		\]
+	\end{block}
+
+	\begin{alertblock}{这一步在做什么}
+		前面过滤阶段主要是为了尽量满足假设 3；这里开始真正让 LLM 产出后面理论公式里需要的协变量样本和条件概率。
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{工程方法：（v）提取已知和未知的协变量}
+	\small
+	\begin{block}{作者的做法}
+		对每个报告 $R_i$，再次 prompt 一个 LLM 来确定完整的协变量集 $X_i$，并要求 $X_i$ 满足 inclusion criteria。
+	\end{block}
+
+	\begin{itemize}
+		\item 与前面第 (iv) 步不同，这一次要求 LLM 对之前的 \texttt{Unknown} 协变量也给出猜测值
+		\item 但第一次已经确定的“已知协变量”不能乱改，作者会检查第二次提取与第一次在这些变量上保持一致
+	\end{itemize}
+
+	\begin{exampleblock}{直观理解}
+		前面的过滤步骤只需要判断“这条报告能不能留下来”；而这里需要真正得到一份可计算的 $X_i$，因为后面的 NATURAL IPW / OI 都要把 $X_i$ 代入公式。
+	\end{exampleblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{工程方法：（vi）推断条件分布 $P(T,Y \mid R,X)$}
+	\small
+	\begin{block}{目标}
+		给定前面步骤得到的 $\{R_i,X_i\}_{i=1}^n$，作者用可访问 log-probabilities 的 LLM 来计算
+		\[
+		P_{\text{LLM}}(T=t,Y=y \mid R_i,X_i)
+		\]
+	\end{block}
+
+	\begin{itemize}
+		\item 具体做法是：让 LLM 在看到 $R_i,X_i$ 后回答关于 $T,Y$ 的问题
+		\item 对每个可能答案 $(T=t,Y=y)$，利用 LLM 的 log-probabilities 打分
+		\item 再把这些分数指数化并重归一化，得到合法的概率分布
+	\end{itemize}
+
+	\begin{alertblock}{直观理解}
+		这里不是只让 LLM 给一个“最可能答案”，而是要它给出整套概率分布，因为后面的 NATURAL 估计器需要的正是这些条件概率。
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{工程方法：（vii）按 Inclusion Criteria 匹配度加权}
+	\small
+	\begin{block}{目标}
+		作者还会计算
+		\[
+		P_{\text{LLM}}(X_i \in \mathcal{I}\mid R_i)
+		\]
+		作为条件 ATE 公式里的权重。
+	\end{block}
+
+	\begin{itemize}
+		\item 做法类似于上一步：给 LLM 一份报告 $R_i$ 和必须满足的 inclusion criteria 描述
+		\item 让 LLM 判断这条报告对应的个体有多大概率属于目标子人群
+		\item 这个概率越大，该报告在条件 ATE 里的权重就越大
+	\end{itemize}
+
+	\begin{exampleblock}{一句话理解}
+		这一步是在回答：在所有留下来的报告里，哪一些更像我们真正关心的那类人？
+	\end{exampleblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{工程方法：最终 pipeline 输出了什么}
+	\small
+	\begin{block}{最终产物}
+		这套 pipeline 最终会输出：
+		\begin{itemize}
+			\item 一个数据集 $\{R_i,X_i\}_{i=1}^n$
+			\item 一组条件分布 $P(T=t,Y=y \mid R_i,X_i)$
+		\end{itemize}
+	\end{block}
+
+	\begin{itemize}
+		\item 这些输出可以直接插入第 3 节中的混合 NATURAL 估计器
+		\item 也就是说，工程方法的任务就是把“原始文本报告”转换成“理论方法可以消费的输入”
+	\end{itemize}
+
+	\begin{alertblock}{作者的态度}
+		虽然实验结果支持这条 pipeline 的有效性，但作者也承认：他们无法正式保证它完全满足假设 3 和假设 4。
+	\end{alertblock}
+\end{frame}
+
+%%%%========== 第四部分：挑战 ==========%%%%
+\section{挑战}
+\begin{frame}
+	\frametitle{挑战：NATURAL 的总体局限}
+	\small
+	\begin{block}{除了观察性研究本身的局限之外}
+		NATURAL 还额外依赖于：LLM 能否足够准确地近似前面理论中需要的条件分布。
+	\end{block}
+
+	\begin{itemize}
+		\item 假设 1 和假设 2 本来就依赖从业者/领域专家判断
+		\item NATURAL 进一步要求 LLM 近似满足假设 3 和假设 4
+		\item 但这些假设在多大程度上真的成立，几乎不可能被正式验证
+	\end{itemize}
+
+	\begin{alertblock}{作者特别强调}
+		虽然预训练 LLM 往往具有较好的校准性，但 post-training 可能破坏这种校准；
+		因此 NATURAL \textbf{不适合直接}给最终用户推荐治疗方案，也不应直接用于高风险公共政策决策。
+	\end{alertblock}
+
+	\begin{exampleblock}{更合理的使用方式}
+		作者更把 NATURAL 看成一个“大规模近似 ATE、帮助优先安排后续验证性 CRE/RCT”的工具。
+		在用于高风险决策前，预测结果应先经过实验验证。
+	\end{exampleblock}
+\end{frame}
+
+\begin{frame}
+	\frametitle{挑战：非结构化自我报告数据带来的三类问题}
+	\small
+	\begin{block}{1. 网络干扰（Network Interference）}
+		要获得 i.i.d. 报告并不容易。在线论坛用户可能彼此交流，并影响对方的 treatment 选择，这会破坏独立性假设。
+	\end{block}
+
+	\begin{block}{2. 结局测量（Outcome Measurement）}
+		NATURAL 依赖自我报告，所以用户必须能够报告感兴趣的 outcome。
+		如果结局只能靠昂贵或不可获得的测试测量，这种方法就不适用。
+	\end{block}
+
+	\begin{block}{3. 选择偏差（Selection Bias）}
+		愿意发帖报告的人本身可能就不是随机的：
+		\begin{itemize}
+			\item 个体是否报告，可能受 treatment 体验影响
+			\item 哪些人会参与在线论坛，本身也会带来偏差
+		\end{itemize}
+		因此 NATURAL 估计的往往更像局部 ATE，不保证外部有效性。
+	\end{block}
 \end{frame}
 
 %%%%========== 第五部分：实验 ==========%%%%

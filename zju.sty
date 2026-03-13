@@ -124,17 +124,14 @@
 % 5. 页脚与页眉（footline/headline）自定义
 % ============================================================
 
-% --- 页脚 footline: 作者 | 日期 | 标题 | 页码 ---
+% --- 页脚 footline: 日期 | 标题 | 页码 ---
 \defbeamertemplate*{footline}{zju theme}{%
   \leavevmode%
   \hbox{%
-    \begin{beamercolorbox}[wd=.35\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
-      \usebeamerfont{author in head/foot}\insertshortauthor
-    \end{beamercolorbox}%
-    \begin{beamercolorbox}[wd=.25\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \begin{beamercolorbox}[wd=.30\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
       \usebeamerfont{author in head/foot}\insertshortdate
     \end{beamercolorbox}%
-    \begin{beamercolorbox}[wd=.34\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \begin{beamercolorbox}[wd=.64\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
       \usebeamerfont{title in head/foot}\insertshorttitle
     \end{beamercolorbox}%
     \begin{beamercolorbox}[wd=0.06\paperwidth,ht=2.25ex,dp=1ex,right]{title in head/foot}%
@@ -154,7 +151,8 @@
   \fi
 }
 \def\zju@blue{blue}
-% 默认 headline 颜色
+% 默认 headline 颜色，避免在未调用 \zjusectioncolor 前出现未定义错误
+\def\zju@headlinecolor{section in head/foot}
 
 % --- 页眉 headline ---
 \defbeamertemplate*{headline}{zju theme}{%
