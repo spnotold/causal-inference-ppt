@@ -1,0 +1,124 @@
+%# -*- coding:utf-8 -*-
+\documentclass[10pt,aspectratio=169,mathserif]{beamer}		
+%设置为 Beamer 文档类型，设置字体为 10pt，长宽比为16:9，数学字体为 serif 风格
+
+%%%%-----导入宏包-----%%%%
+\usepackage{zju}			%导入 zju 模板宏包
+\usepackage{ctex}			%导入 ctex 宏包，添加中文支持
+\usepackage{amsmath,amsfonts,amssymb,bm}   %导入数学公式所需宏包
+\usepackage{color}			 %字体颜色支持
+\usepackage{graphicx,hyperref,url}
+\usepackage{metalogo}	% 非必须
+%% 上文引用的包可按实际情况自行增删
+%%%%%%%%%%%%%%%%%%
+\usepackage{fontspec}
+\usepackage{xeCJK}
+% \setCJKmainfont{Source Han Sans SC}
+
+\beamertemplateballitem		%设置 Beamer 主题
+
+%%%%------------------------%%%%%
+\catcode`\。=\active         %或者=13
+\newcommand{。}{．}				
+%将正文中的“。”号转换为“.”。中文标点国家规范建议科技文献中的句号用圆点替代
+%%%%%%%%%%%%%%%%%%%%%
+
+%%%%----首页信息设置----%%%%
+\title[浙江大学 Beamer 模板]{浙江大学 Beamer 模板}
+\subtitle{——这里是副标题}			
+%%%%----标题设置
+
+\author[Guang Touge]{
+  光头哥 \\\medskip
+  {\small \url{chenqiyuan1012@foxmail.com}} \\
+  {\small \url{https://www.zju.edu.cn/}}}
+%%%%----个人信息设置
+  
+\institute[IOPP]{
+  计算机学院 \\ 
+  浙江大学}
+%%%%----机构信息
+
+\date[Aug. 31 2023]{
+  2023年8月31日}
+%%%%----日期信息
+  
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}				%生成标题页
+
+\section{提纲}
+\begin{frame}
+	\frametitle{提纲}
+	\tableofcontents
+\end{frame}				%生成提纲页
+
+%%%%========== 第一部分：问题 ==========%%%%
+\section{问题}
+\begin{frame}
+	\frametitle{问题}
+	\begin{itemize}
+		\item 研究背景
+		\item 核心问题是什么？
+		\item 为什么这个问题重要？
+	\end{itemize}
+\end{frame}
+
+%%%%========== 第二部分：相关工作 ==========%%%%
+\section{相关工作}
+\begin{frame}
+	\frametitle{相关工作}
+	\begin{itemize}
+		\item 已有方法一
+		\item 已有方法二
+		\item 已有方法的局限性
+	\end{itemize}
+\end{frame}
+
+%%%%========== 第三部分：挑战/创新 ==========%%%%
+\section{挑战/创新}
+\begin{frame}
+	\frametitle{挑战与创新}
+	\begin{itemize}
+		\item 现有方法面临的挑战
+		\item 本文的创新点
+		\item 主要贡献
+	\end{itemize}
+\end{frame}
+
+%%%%========== 第四部分：方法 ==========%%%%
+\section{方法}
+\begin{frame}
+	\frametitle{方法}
+	\begin{itemize}
+		\item 整体框架
+		\item 关键模块/算法
+		\item 理论分析
+	\end{itemize}
+\end{frame}
+
+%%%%========== 第五部分：实验 ==========%%%%
+\section{实验}
+\begin{frame}
+	\frametitle{实验}
+	\begin{itemize}
+		\item 实验设置（数据集、基线方法、评估指标）
+		\item 主要实验结果
+		\item 消融实验
+	\end{itemize}
+\end{frame}
+
+%%%%========== 第六部分：思考 ==========%%%%
+\section{思考}
+\begin{frame}
+	\frametitle{思考}
+	\begin{itemize}
+		\item 论文的优点与不足
+		\item 可能的改进方向
+		\item 对未来研究的启发
+	\end{itemize}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,16 @@
+## LaTeX 编译中间文件
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+
+## 编译输出
+*.pdf
