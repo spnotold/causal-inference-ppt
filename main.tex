@@ -539,7 +539,7 @@
 		\end{column}
 	\end{columns}
 
-	\vspace{0.2em}
+	\vspace{0.15em}
 	\begin{columns}[T,onlytextwidth]
 		\begin{column}{0.50\textwidth}
 			\textbf{公式讲解}
@@ -583,89 +583,100 @@
 	\end{itemize}
 \end{frame}
 
+% ---- NATURAL OI 第一页：核心目标 + 增广数据 ----
 \begin{frame}
-	\frametitle{理论方法：NATURAL OI（混合版本）}
-	\footnotesize
-	\begin{block}{核心思想}
-		NATURAL OI 延续了经典 OI 的思路：先估计结局模型，再比较同一个个体在 $T=1$ 和 $T=0$ 下的预测结局差异。
-	\end{block}
+	\frametitle{理论方法：NATURAL OI（混合版本）— 公式推导}
+	\small
+	\textbf{核心思想：} NATURAL OI 延续了经典 OI 的思路：先估计结局模型，再比较同一个个体在 $T=1$ 和 $T=0$ 下的预测结局差异。
 
-	\begin{block}{核心目标}
-		\[
-		P(Y=1 \mid T=t,X=x)
-		\]
-		也就是：对于特征为 $x$、处理状态为 $t$ 的个体，好结果发生的概率。
-	\end{block}
+	\vspace{0.6em}
+	\textcolor{structure}{\textbf{Step 1\quad 核心目标与作者的改写}}
+	\vspace{0.3em}
 
-	\begin{block}{作者的改写}
-		\[
-		P(Y=1 \mid T=t,X=x)
-		=
-		\frac{\mathbb{E}_{R,X,T}[P(Y=1 \mid R,X,T)\mathbb{I}(X=x,T=t)]}
-		{\mathbb{E}_{R,X,T}[\mathbb{I}(X=x,T=t)]}
-		\]
-	\end{block}
+	\begin{columns}[T,onlytextwidth]
+		\begin{column}{0.50\textwidth}
+			\[
+			P(Y=1 \mid T=t,X=x)
+			\]
+			\vspace{-0.8em}
+			\[
+			\resizebox{0.96\textwidth}{!}{$
+			=\;
+			\frac{\mathbb{E}_{R,X,T}[P(Y=1 \mid R,X,T)\,\mathbb{I}(X=x,T=t)]}
+			{\mathbb{E}_{R,X,T}[\mathbb{I}(X=x,T=t)]}
+			$}
+			\]
+		\end{column}
+		\begin{column}{0.48\textwidth}
+			\begin{itemize}\itemsep0.3em
+				\item 目标量：特征为 $x$、处理为 $t$ 的个体出现好结果的概率
+				\item 挑出满足 $(X\!=\!x,T\!=\!t)$ 的样本
+				\item 利用报告 $R$ 计算 $P(Y\!=\!1 \mid R,X,T)$ 再平均
+			\end{itemize}
+		\end{column}
+	\end{columns}
 
-	\begin{itemize}
-		\item 先在所有样本里挑出满足 $(X=x,T=t)$ 的那一类人
-		\item 对这些人，利用文本报告 $R$ 计算其好结果概率 $P(Y=1 \mid R,X,T)$
-		\item 再把这些概率做平均，就得到 $P(Y=1 \mid X=x,T=t)$
-	\end{itemize}
+	\vspace{0.8em}
+	\textcolor{structure}{\textbf{Step 2\quad 增广数据与结局预测器}}
+	\vspace{0.3em}
+
+	\begin{columns}[T,onlytextwidth]
+		\begin{column}{0.50\textwidth}
+			{\footnotesize 对每份报告 $R_i$，从 $P(X,T \mid R_i)$ 中采样得到增广数据 $(R_i,X_i,T_i)$：}
+			\[
+			\resizebox{0.96\textwidth}{!}{$
+			\hat{\tau}_{\text{N-OI}}(x,t)
+			=
+			\frac{\sum_{i=1}^{n}P(Y\!=\!1 \mid R_i,X_i,T_i)\,\mathbb{I}(X_i\!=\!x,T_i\!=\!t)}
+			{\sum_{i=1}^{n}\mathbb{I}(X_i\!=\!x,T_i\!=\!t)}
+			$}
+			\]
+		\end{column}
+		\begin{column}{0.48\textwidth}
+			\begin{itemize}\itemsep0.3em
+				\item 筛出满足 $(X_i\!=\!x,T_i\!=\!t)$ 的增广样本
+				\item 平均其好结果概率，得到 $\hat{\tau}_{\text{N-OI}}(x,t)$
+				\item $\mathbb{I}(\cdot)$ 是筛选器：满足取 1，否则取 0
+			\end{itemize}
+		\end{column}
+	\end{columns}
 \end{frame}
 
+% ---- NATURAL OI 第二页：最终 ATE ----
 \begin{frame}
-	\frametitle{理论方法：NATURAL OI 的结局预测器}
+	\frametitle{理论方法：NATURAL OI（混合版本）— 最终估计}
 	\small
-	\begin{block}{增广数据}
-		作者不直接拥有表格数据，而是对每份报告 $R_i$ 从 $P(X,T \mid R_i)$ 中采样，得到增广数据 $(R_i,X_i,T_i)$。
-	\end{block}
 
-	\begin{block}{结局预测器}
-		\[
-		\hat{\tau}_{\text{N-OI}}(x,t)
-		=
-		\frac{\sum_{i=1}^{n}P(Y=1 \mid R_i,X_i,T_i)\mathbb{I}(X_i=x,T_i=t)}
-		{\sum_{i=1}^{n}\mathbb{I}(X_i=x,T_i=t)}
-		\]
-	\end{block}
+	\textcolor{structure}{\textbf{Step 3\quad 最终 ATE 估计}}
+	\vspace{0.5em}
 
-	\begin{itemize}
-		\item 在所有补出来满足 $(X_i=x,T_i=t)$ 的样本中
-		\item 平均它们对应的好结果概率 $P(Y=1 \mid R_i,X_i,T_i)$
-		\item 把这个平均值当作 $\hat{\tau}_{\text{N-OI}}(x,t)$，也就是结局模型的估计
-	\end{itemize}
+	\begin{columns}[T,onlytextwidth]
+		\begin{column}{0.50\textwidth}
+			\[
+			\resizebox{0.96\textwidth}{!}{$
+			\hat{\tau}_{\text{N-OI}}
+			=
+			\frac{1}{n}\sum_{i=1}^{n}\bigl[\hat{\tau}_{\text{N-OI}}(X_i,1)-\hat{\tau}_{\text{N-OI}}(X_i,0)\bigr]
+			$}
+			\]
+		\end{column}
+		\begin{column}{0.48\textwidth}
+			\begin{itemize}\itemsep0.3em
+				\item 固定每个个体的特征 $X_i$
+				\item 分别预测 treatment 和 control 下的结局
+				\item 两者相减 $\to$ 该个体的估计处理效应
+				\item 对所有个体平均 $\to$ ATE
+			\end{itemize}
+		\end{column}
+	\end{columns}
 
-	\begin{exampleblock}{关于指示函数 $\mathbb{I}(X_i=x,T_i=t)$}
-		它只是一个筛选器：当样本满足 $X_i=x$ 且 $T_i=t$ 时取 1，否则取 0。
-	\end{exampleblock}
-\end{frame}
-
-\begin{frame}
-	\frametitle{理论方法：NATURAL OI 的最终 ATE 估计}
-	\small
-	\begin{block}{最终估计量}
-		\[
-		\hat{\tau}_{\text{N-OI}}
-		=
-		\frac{1}{n}\sum_{i=1}^{n}\hat{\tau}_{\text{N-OI}}(X_i,1)-\hat{\tau}_{\text{N-OI}}(X_i,0)
-		\]
-	\end{block}
-
-	\begin{itemize}
-		\item 对每个个体，固定它的特征 $X_i$
-		\item 预测它在 treatment 下的结局 $\hat{\tau}_{\text{N-OI}}(X_i,1)$
-		\item 再预测它在 control 下的结局 $\hat{\tau}_{\text{N-OI}}(X_i,0)$
-		\item 两者相减，得到该个体的估计处理效应
-		\item 再对所有个体平均，得到 ATE
-	\end{itemize}
-
-	\begin{alertblock}{和 NATURAL IPW 的区别}
-		\begin{itemize}
-			\item NATURAL IPW 重点估计的是倾向得分：$e(x)=P(T=1 \mid X=x)$
-			\item NATURAL OI 重点估计的是结局模型：$P(Y=1 \mid X=x,T=t)$
-			\item 前者通过重新加权消除偏差，后者通过补全反事实来估计效应
+	\vspace{1.2em}
+	\begin{block}{NATURAL IPW \textit{vs.}\ NATURAL OI}
+		\begin{itemize}\itemsep0.3em
+			\item \textbf{NATURAL IPW}：重点估计倾向得分 $e(x)$，通过加权校正选择偏差
+			\item \textbf{NATURAL OI}：重点估计结局模型 $P(Y\!=\!1 \mid X\!=\!x,T\!=\!t)$，直接预测反事实结局
 		\end{itemize}
-	\end{alertblock}
+	\end{block}
 \end{frame}
 
 \begin{frame}
