@@ -3,7 +3,7 @@
 %设置为 Beamer 文档类型，设置字体为 10pt，长宽比为16:9，数学字体为 serif 风格
 
 %%%%-----导入宏包-----%%%%
-\usepackage{zju}			%导入 zju 模板宏包 (确保同目录下有 zju_beamer.sty)
+\usepackage{zju}			%导入 zju 模板宏包 (确保同目录下有 zju.sty)
 \usepackage{ctex}			%导入 ctex 宏包，添加中文支持
 \usepackage{amsmath,amsfonts,amssymb,bm}   %导入数学公式所需宏包
 \usepackage{color}			 %字体颜色支持
@@ -1044,7 +1044,6 @@
 			\item \textbf{引入混杂与文本化}：按人工倾向得分对样本非均匀子采样引入混杂；随后赋予样本“大五人格”，通过 LLM 生成逼真的自述文本。
 		\end{itemize}
 	\end{block}
-	\pause
 	\begin{block}{4 个真实世界临床数据集 (Real-world Datasets)：严格对齐 RCT}
 		从 Reddit 提取患者自述，并以\textbf{三/四期真实临床对照试验 (RCTs)} 作为金标准。
 		\begin{itemize}
@@ -1097,8 +1096,8 @@
 	\vspace{-0.2cm}
 	\begin{alertblock}{端到端结果揭晓}
 		\begin{itemize}
-			\item \textbf{极高的精度}：在所有 3 个保留测试集上，表现最佳的 NATURAL 估计器预测的 ATE，与真实临床试验 ATE 的\textbf{绝对误差全部控制在 3 个百分点以内}！ \pause
-			\item \textbf{正确的效应方向}：100\%精准预判了所有疗效优劣的“方向”。 \pause
+			\item \textbf{极高的精度}：在所有 3 个保留测试集上，表现最佳的 NATURAL 估计器预测的 ATE，与真实临床试验 ATE 的\textbf{绝对误差全部控制在 3 个百分点以内}！
+			\item \textbf{正确的效应方向}：100\%精准预判了所有疗效优劣的“方向”。
 			\item \textbf{逼近“神谕”}：在合成数据中，NATURAL 不仅击败了有监督的文本基线，其表现甚至逼近了能够看到全部底层结构化表格的“Oracle (IPW Structured)”基线。
 		\end{itemize}
 	\end{alertblock}
@@ -1158,8 +1157,8 @@
 		\begin{column}{0.48\textwidth}
 			\begin{block}{大模型规模（Scale）对推断精度的影响}
 				\begin{itemize}
-					\item 实验对比了 Uniform 分布、LLaMA2-7B、13B 和 70B 作为条件概率生成器的效果。 \pause
-					\item \textbf{大力出奇迹}：参数量越大的 LLM，其输出的条件概率校准度越高，最终推断的 ATE 误差也越小。 \pause
+					\item 实验对比了 Uniform 分布、LLaMA2-7B、13B 和 70B 作为条件概率生成器的效果。
+					\item \textbf{大力出奇迹}：参数量越大的 LLM，其输出的条件概率校准度越高，最终推断的 ATE 误差也越小。
 					\item 大语言模型的规模“涌现”能力，直接转化为了因果推断工具层面的精度飞跃。
 				\end{itemize}
 			\end{block}
@@ -1177,7 +1176,6 @@
 	        \begin{block}{敏感性分析的本质}
         		在控制了所有提取到的文本特征后，如果仍存在某个未被记录的混杂因素，它需要多“强”（导致不同组产生特定结果的概率比值差异有多大），才能把我们观测到的因果效应（ATE）方向“反转”？
         	\end{block}
-        	\pause
         	\begin{alertblock}{实验结论}
         		\begin{itemize}
         			\item 结果显示，NATURAL IPW 在大多数测试集上展现出极高的鲁棒性。
@@ -1206,15 +1204,14 @@
 
 	\begin{block}{方法层面的理论隐患}
 		\begin{itemize}
-			\item \textbf{大模型条件概率的不可验证性与对齐税}：NATURAL 强依赖于 LLM 给出准确的概率分布。然而，经过人类反馈强化学习（RLHF）“对齐”后的大模型，其输出概率往往发生扭曲（失真）。模型是否还能代表真实世界的统计分布？在数学上这是极难形式化验证的。 \pause
+			\item \textbf{大模型条件概率的不可验证性与对齐税}：NATURAL 强依赖于 LLM 给出准确的概率分布。然而，经过人类反馈强化学习（RLHF）“对齐”后的大模型，其输出概率往往发生扭曲（失真）。模型是否还能代表真实世界的统计分布？在数学上这是极难形式化验证的。
 			\item \textbf{违背 SUTVA (个体稳定干预假设)}：在线论坛中，用户发帖会互相影响、“跟风”用药，这就破坏了因果推断最基石的“个体独立同分布 (i.i.d.)” 假设。
 		\end{itemize}
 	\end{block}
 
-    \pause
 	\begin{block}{非结构化数据的“幸存者偏差”}
 		\begin{itemize}
-			\item \textbf{结果测量受限}：该方法仅适用于“患者可以自我感知”的终点指标（如体重、偏头痛频次）。无法替代需要精密医疗化验的复杂指标。 \pause
+			\item \textbf{结果测量受限}：该方法仅适用于“患者可以自我感知”的终点指标（如体重、偏头痛频次）。无法替代需要精密医疗化验的复杂指标。
 			\item \textbf{选择性发帖偏差 (Selection Bias)}：在网上长篇大论的人群可能无法代表总体。更严重的是，患者往往是因为经历了“疗效奇好”或“副作用极大”才选择发帖，结果导致了极为复杂的缺失数据机制。
 		\end{itemize}
 	\end{block}
@@ -1266,11 +1263,10 @@
 	\begin{block}{论文历史定位}
 		本文是学术界迈向“利用 LLM 自动化提取非结构化文本因果价值”的重要里程碑。研究极具开创性地证明：只要提供恰当的结构化引导，经典的因果推断框架（如 IPW / OI）可以与 LLM 内置的世界知识与概率提取能力进行完美融合。
 	\end{block}
-    \pause
 	\begin{block}{未来值得探索的研究方向}
 		\begin{itemize}
-			\item \textbf{向连续变量扩展}：目前研究局限于二元干预与二元结果，如何稳定、无偏地扩展到实数值连续型 $(X, T, Y)$ 的 ATE 估计，是一个巨大的挑战。 \pause
-			\item \textbf{自动化提示词优化 (Prompt Tuning)}：当前流水线中“纳入标准”的设定仍严重依赖人工专家微调，未来可引入自动提示词搜索以进一步减少人工成本。 \pause
+			\item \textbf{向连续变量扩展}：目前研究局限于二元干预与二元结果，如何稳定、无偏地扩展到实数值连续型 $(X, T, Y)$ 的 ATE 估计，是一个巨大的挑战。
+			\item \textbf{自动化提示词优化 (Prompt Tuning)}：当前流水线中“纳入标准”的设定仍严重依赖人工专家微调，未来可引入自动提示词搜索以进一步减少人工成本。
 			\item \textbf{跨学科大挪移}：跳出医疗健康领域的限制，将 NATURAL 部署到社会科学、经济学或政治学等，任何存在海量非结构化自然语言文本的因果效应论证场景中。
 		\end{itemize}
 	\end{block}
