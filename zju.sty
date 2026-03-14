@@ -124,7 +124,7 @@
 % 5. 页脚与页眉（footline/headline）自定义
 % ============================================================
 
-% --- 页脚 footline: 日期 | 标题 | 页码 ---
+% --- 页脚 footline: 日期 | 标题 | 实际页码 ---
 \defbeamertemplate*{footline}{zju theme}{%
   \leavevmode%
   \hbox{%
@@ -135,7 +135,7 @@
       \usebeamerfont{title in head/foot}\insertshorttitle
     \end{beamercolorbox}%
     \begin{beamercolorbox}[wd=0.06\paperwidth,ht=2.25ex,dp=1ex,right]{title in head/foot}%
-      \insertframenumber{} / \inserttotalframenumber\hspace*{2ex}
+      \insertpagenumber{} / \insertpresentationendpage\hspace*{2ex}
     \end{beamercolorbox}}%
   \vskip0pt%
 }

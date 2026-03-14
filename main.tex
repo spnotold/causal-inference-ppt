@@ -452,339 +452,297 @@
 
 \begin{frame}
 	\frametitle{理论方法：NATURAL Full（理想化版本）}
-	\small
-	\begin{block}{基本设定}
+	\scriptsize
+	\begin{block}{基本设定与核心恒等式}
 		给定报告样本 $\{R_i\}_{i=1}^n$ 和条件分布 $P(X=x,T=t,Y=y \mid R=r)$，
 		作者构造 NATURAL 的理想化估计器。
-	\end{block}
-
-	\begin{block}{核心恒等式}
 		\[
-		\begin{aligned}
+		\resizebox{0.96\textwidth}{!}{$
 		\tau
-		&= \mathbb{E}_{X,T,Y}\left[\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}\right] \\
-		&= \mathbb{E}_R\left[\mathbb{E}_{X,T,Y \mid R}\left[\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}\right]\right]
-		\end{aligned}
+		= \mathbb{E}_{X,T,Y}\left[\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}\right]
+		= \mathbb{E}_R\left[\mathbb{E}_{X,T,Y \mid R}\left[\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}\right]\right]
+		$}
 		\]
 	\end{block}
 
 	\begin{itemize}
-		\item 这一步本质上是把原来的 IPW 表达式，改写成先对报告 $R$ 条件化，再对报告取平均
-		\item 可以先固定一份报告 $R$，计算该报告下隐含的 $(X,T,Y)$ 的平均 IPW 值
-		\item 再对所有报告取平均，就得到整体的 ATE
-	\end{itemize}
-\end{frame}
-
-\begin{frame}
-	\frametitle{理论方法：NATURAL Full 的 Monte Carlo 估计}
-	\small
-	\begin{block}{估计量}
-		\[
-		\hat{\tau}_{\text{N-Full}}
-		=
-		\frac{1}{n}\sum_{i=1}^{n}\sum_{x,t,y}
-		P(X=x,T=t,Y=y \mid R_i)
-		\left[
-		\frac{ty}{\hat{e}_{\text{N-Full}}(x)}
-		-
-		\frac{(1-t)y}{1-\hat{e}_{\text{N-Full}}(x)}
-		\right]
-		\]
-	\end{block}
-
-	\begin{itemize}
-		\item 对每份报告 $R_i$，枚举所有可能的 $(x,t,y)$
-		\item 用 $P(X,T,Y \mid R_i)$ 作为权重，计算该报告的期望 IPW 贡献
-		\item 再对所有报告平均，得到 ATE 的估计
+		\item 本质上是把原来的 IPW 表达式改写成：先对报告 $R$ 条件化，再对报告取平均
+		\item 也就是先固定一份报告 $R$，计算该报告下隐含的 $(X,T,Y)$ 的平均 IPW 值；再对所有报告取平均
 	\end{itemize}
 
-	\begin{alertblock}{为什么说它是理想化版本}
-		\begin{itemize}
-			\item 它要求我们知道完整的 $P(X,T,Y \mid R)$
-			\item 当协变量 $X$ 维度很高时，需要枚举所有 $(x,t,y)$，计算开销会很大
-		\end{itemize}
-	\end{alertblock}
+	\vspace{-0.1em}
+	\begin{columns}[T,onlytextwidth]
+		\begin{column}{0.64\textwidth}
+			\begin{block}{Monte Carlo 估计量}
+				\[
+				\resizebox{\textwidth}{!}{$
+				\hat{\tau}_{\text{N-Full}}
+				=
+				\frac{1}{n}\sum_{i=1}^{n}\sum_{x,t,y}
+				P(X=x,T=t,Y=y \mid R_i)
+				\left[
+				\frac{ty}{\hat{e}_{\text{N-Full}}(x)}
+				-
+				\frac{(1-t)y}{1-\hat{e}_{\text{N-Full}}(x)}
+				\right]
+				$}
+				\]
+			\end{block}
+
+			\vspace{-0.5em}
+			\begin{itemize}
+				\item 对每份报告枚举所有可能的 $(x,t,y)$，并用 $P(X,T,Y \mid R_i)$ 作为权重
+				\item 由此得到该报告的期望 IPW 贡献；再对所有报告平均，就得到 ATE 的估计
+			\end{itemize}
+		\end{column}
+		\begin{column}{0.34\textwidth}
+			\begin{alertblock}{为什么说它是理想化版本}
+				\begin{itemize}
+					\item 需要知道完整的 $P(X,T,Y \mid R)$
+					\item 当协变量 $X$ 维度很高时，需要枚举所有 $(x,t,y)$，计算开销会很大
+				\end{itemize}
+			\end{alertblock}
+		\end{column}
+	\end{columns}
 \end{frame}
 
 \begin{frame}
 	\frametitle{理论方法：NATURAL IPW（混合版本）}
+	\scriptsize
+
+	\textcolor{structure}{\textbf{Step 1\quad 核心公式}} \hfill
+	\textcolor{structure}{\textbf{Step 2\quad 倾向得分估计}}
+
+	\vspace{0.2em}
+	\begin{columns}[T,onlytextwidth]
+		\begin{column}{0.50\textwidth}
+			\[
+			\resizebox{0.94\textwidth}{!}{$
+			\tau
+			=
+			\mathbb{E}_{R,X}
+			\!\left[
+			\mathbb{E}_{T,Y|R,X}
+			\!\left[
+			\frac{TY}{e(X)}-\frac{(1\!-\!T)Y}{1-e(X)}
+			\right]
+			\right]
+			$}
+			\]
+			\vspace{-0.6em}
+			\begin{itemize}\itemsep0.1em
+				\item 对每份报告 $R_i$，从 $P(X \mid R_i)$ 中采样 $X_i$
+				\item 根据 $P(T,Y \mid R_i,X_i)$ 计算 IPW 贡献
+				\item 只对 $X$ 采样，比 NATURAL Full 更省
+			\end{itemize}
+		\end{column}
+		\begin{column}{0.48\textwidth}
+			\[
+			\resizebox{0.96\textwidth}{!}{$
+			\hat{e}_{\text{N-IPW}}(x)
+			=
+			\frac{\sum_{i=1}^{n}P(T\!=\!1 \mid R_i,X_i)\,\mathbb{I}(X_i\!=\!x)}
+			{\sum_{i=1}^{n}\mathbb{I}(X_i\!=\!x)}
+			$}
+			\]
+			\vspace{-0.6em}
+			\begin{itemize}\itemsep0.1em
+				\item 满足 $X_i\!=\!x$ 的样本治疗概率取平均
+				\item 作为倾向得分 $e(x)$ 的估计
+			\end{itemize}
+		\end{column}
+	\end{columns}
+
+	\vspace{0.3em}
+	\textcolor{structure}{\textbf{Step 3\quad ATE 估计量}}
+	\vspace{0.1em}
+	\[
+	\hat{\tau}_{\text{N-IPW}}
+	=
+	\frac{1}{n}\sum_{i=1}^{n}\sum_{t,y}
+	P(T\!=\!t,Y\!=\!y \mid R_i,X_i)
+	\left[
+	\frac{ty}{\hat{e}_{\text{N-IPW}}(X_i)}
+	-
+	\frac{(1\!-\!t)y}{1-\hat{e}_{\text{N-IPW}}(X_i)}
+	\right]
+	\]
+	\vspace{-0.4em}
+	\begin{itemize}\itemsep0.1em
+		\item 对每份报告只随机补一个 $X_i$，对 $T,Y$ 的 4 种情况按条件概率加权，所有样本平均 $\to$ ATE
+	\end{itemize}
+\end{frame}
+
+% ---- NATURAL OI 第一页：核心目标 + 增广数据 ----
+\begin{frame}
+	\frametitle{理论方法：NATURAL OI（混合版本）— 公式推导}
 	\small
-	\begin{block}{核心思想}
-		NATURAL IPW 不再枚举所有 $(X,T,Y)$，而是先对 $X$ 采样，再对 $(T,Y)$ 求条件期望。
-	\end{block}
+	\textbf{核心思想：} NATURAL OI 延续了经典 OI 的思路：先估计结局模型，再比较同一个个体在 $T=1$ 和 $T=0$ 下的预测结局差异。
 
-	\begin{block}{核心公式}
-		\[
-		\tau
-		=
-		\mathbb{E}_{R,X}
-		\left[
-		\mathbb{E}_{T,Y \mid R,X}
-		\left[
-		\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}
-		\right]
-		\right]
-		\]
-	\end{block}
+	\vspace{0.6em}
+	\textcolor{structure}{\textbf{Step 1\quad 核心目标与作者的改写}}
+	\vspace{0.3em}
 
-	\begin{itemize}
-		\item 先对每份报告 $R_i$ 从 $P(X \mid R_i)$ 中采样一个 $X_i$
-		\item 得到增广数据 $(R_i,X_i)$
-		\item 再根据 $P(T,Y \mid R_i,X_i)$ 计算该样本的平均 IPW 贡献
-	\end{itemize}
+	\begin{columns}[T,onlytextwidth]
+		\begin{column}{0.50\textwidth}
+			\[
+			P(Y=1 \mid T=t,X=x)
+			\]
+			\vspace{-0.8em}
+			\[
+			\resizebox{0.96\textwidth}{!}{$
+			=\;
+			\frac{\mathbb{E}_{R,X,T}[P(Y=1 \mid R,X,T)\,\mathbb{I}(X=x,T=t)]}
+			{\mathbb{E}_{R,X,T}[\mathbb{I}(X=x,T=t)]}
+			$}
+			\]
+		\end{column}
+		\begin{column}{0.48\textwidth}
+			\begin{itemize}\itemsep0.3em
+				\item 目标量：特征为 $x$、处理为 $t$ 的个体出现好结果的概率
+				\item 挑出满足 $(X\!=\!x,T\!=\!t)$ 的样本
+				\item 利用报告 $R$ 计算 $P(Y\!=\!1 \mid R,X,T)$ 再平均
+			\end{itemize}
+		\end{column}
+	\end{columns}
 
-	\begin{alertblock}{与 NATURAL Full 的区别}
-		NATURAL Full 要枚举所有 $(X,T,Y)$；NATURAL IPW 只对 $X$ 采样，因此计算更省。
-	\end{alertblock}
+	\vspace{0.8em}
+	\textcolor{structure}{\textbf{Step 2\quad 增广数据与结局预测器}}
+	\vspace{0.3em}
+
+	\begin{columns}[T,onlytextwidth]
+		\begin{column}{0.50\textwidth}
+			{\footnotesize 对每份报告 $R_i$，从 $P(X,T \mid R_i)$ 中采样得到增广数据 $(R_i,X_i,T_i)$：}
+			\[
+			\resizebox{0.96\textwidth}{!}{$
+			\hat{\tau}_{\text{N-OI}}(x,t)
+			=
+			\frac{\sum_{i=1}^{n}P(Y\!=\!1 \mid R_i,X_i,T_i)\,\mathbb{I}(X_i\!=\!x,T_i\!=\!t)}
+			{\sum_{i=1}^{n}\mathbb{I}(X_i\!=\!x,T_i\!=\!t)}
+			$}
+			\]
+		\end{column}
+		\begin{column}{0.48\textwidth}
+			\begin{itemize}\itemsep0.3em
+				\item 筛出满足 $(X_i\!=\!x,T_i\!=\!t)$ 的增广样本
+				\item 平均其好结果概率，得到 $\hat{\tau}_{\text{N-OI}}(x,t)$
+				\item $\mathbb{I}(\cdot)$ 是筛选器：满足取 1，否则取 0
+			\end{itemize}
+		\end{column}
+	\end{columns}
 \end{frame}
 
+% ---- NATURAL OI 第二页：最终 ATE ----
 \begin{frame}
-	\frametitle{理论方法：NATURAL IPW 的估计量}
-	\footnotesize
-	\begin{block}{ATE 估计量}
-		\[
-		\hat{\tau}_{\text{N-IPW}}
-		=
-		\frac{1}{n}\sum_{i=1}^{n}\sum_{t,y}
-		P(T=t,Y=y \mid R_i,X_i)
-		\left[
-		\frac{ty}{\hat{e}_{\text{N-IPW}}(X_i)}
-		-
-		\frac{(1-t)y}{1-\hat{e}_{\text{N-IPW}}(X_i)}
-		\right]
-		\]
-	\end{block}
-
-	\begin{itemize}
-		\item 对每份报告，只随机补一个 $X_i$
-		\item 对 $T,Y$ 的 4 种可能情况按条件概率加权
-		\item 最后对所有样本平均，得到 ATE 估计
-	\end{itemize}
-
-	\begin{block}{倾向得分估计}
-		\[
-		\hat{e}_{\text{N-IPW}}(x)
-		=
-		\frac{\sum_{i=1}^{n}P(T=1 \mid R_i,X_i)\mathbb{I}(X_i=x)}
-		{\sum_{i=1}^{n}\mathbb{I}(X_i=x)}
-		\]
-	\end{block}
-
-	\begin{exampleblock}{公式含义}
-		把所有满足 $X_i=x$ 的样本治疗概率 $P(T=1 \mid R_i,X_i)$ 取平均，作为 $e(x)$ 的估计。
-	\end{exampleblock}
-\end{frame}
-
-\begin{frame}
-	\frametitle{理论方法：NATURAL OI（混合版本）}
-	\footnotesize
-	\begin{block}{核心思想}
-		NATURAL OI 延续了经典 OI 的思路：先估计结局模型，再比较同一个个体在 $T=1$ 和 $T=0$ 下的预测结局差异。
-	\end{block}
-
-	\begin{block}{核心目标}
-		\[
-		P(Y=1 \mid T=t,X=x)
-		\]
-		也就是：对于特征为 $x$、处理状态为 $t$ 的个体，好结果发生的概率。
-	\end{block}
-
-	\begin{block}{作者的改写}
-		\[
-		P(Y=1 \mid T=t,X=x)
-		=
-		\frac{\mathbb{E}_{R,X,T}[P(Y=1 \mid R,X,T)\mathbb{I}(X=x,T=t)]}
-		{\mathbb{E}_{R,X,T}[\mathbb{I}(X=x,T=t)]}
-		\]
-	\end{block}
-
-	\begin{itemize}
-		\item 先在所有样本里挑出满足 $(X=x,T=t)$ 的那一类人
-		\item 对这些人，利用文本报告 $R$ 计算其好结果概率 $P(Y=1 \mid R,X,T)$
-		\item 再把这些概率做平均，就得到 $P(Y=1 \mid X=x,T=t)$
-	\end{itemize}
-\end{frame}
-
-\begin{frame}
-	\frametitle{理论方法：NATURAL OI 的结局预测器}
+	\frametitle{理论方法：NATURAL OI（混合版本）— 最终估计}
 	\small
-	\begin{block}{增广数据}
-		作者不直接拥有表格数据，而是对每份报告 $R_i$ 从 $P(X,T \mid R_i)$ 中采样，得到增广数据 $(R_i,X_i,T_i)$。
-	\end{block}
 
-	\begin{block}{结局预测器}
-		\[
-		\hat{\tau}_{\text{N-OI}}(x,t)
-		=
-		\frac{\sum_{i=1}^{n}P(Y=1 \mid R_i,X_i,T_i)\mathbb{I}(X_i=x,T_i=t)}
-		{\sum_{i=1}^{n}\mathbb{I}(X_i=x,T_i=t)}
-		\]
-	\end{block}
+	\textcolor{structure}{\textbf{Step 3\quad 最终 ATE 估计}}
+	\vspace{0.5em}
 
-	\begin{itemize}
-		\item 在所有补出来满足 $(X_i=x,T_i=t)$ 的样本中
-		\item 平均它们对应的好结果概率 $P(Y=1 \mid R_i,X_i,T_i)$
-		\item 把这个平均值当作 $\hat{\tau}_{\text{N-OI}}(x,t)$，也就是结局模型的估计
-	\end{itemize}
+	\begin{columns}[T,onlytextwidth]
+		\begin{column}{0.50\textwidth}
+			\[
+			\resizebox{0.96\textwidth}{!}{$
+			\hat{\tau}_{\text{N-OI}}
+			=
+			\frac{1}{n}\sum_{i=1}^{n}\bigl[\hat{\tau}_{\text{N-OI}}(X_i,1)-\hat{\tau}_{\text{N-OI}}(X_i,0)\bigr]
+			$}
+			\]
+		\end{column}
+		\begin{column}{0.48\textwidth}
+			\begin{itemize}\itemsep0.3em
+				\item 固定每个个体的特征 $X_i$
+				\item 分别预测 treatment 和 control 下的结局
+				\item 两者相减 $\to$ 该个体的估计处理效应
+				\item 对所有个体平均 $\to$ ATE
+			\end{itemize}
+		\end{column}
+	\end{columns}
 
-	\begin{exampleblock}{关于指示函数 $\mathbb{I}(X_i=x,T_i=t)$}
-		它只是一个筛选器：当样本满足 $X_i=x$ 且 $T_i=t$ 时取 1，否则取 0。
-	\end{exampleblock}
-\end{frame}
-
-\begin{frame}
-	\frametitle{理论方法：NATURAL OI 的最终 ATE 估计}
-	\small
-	\begin{block}{最终估计量}
-		\[
-		\hat{\tau}_{\text{N-OI}}
-		=
-		\frac{1}{n}\sum_{i=1}^{n}\hat{\tau}_{\text{N-OI}}(X_i,1)-\hat{\tau}_{\text{N-OI}}(X_i,0)
-		\]
-	\end{block}
-
-	\begin{itemize}
-		\item 对每个个体，固定它的特征 $X_i$
-		\item 预测它在 treatment 下的结局 $\hat{\tau}_{\text{N-OI}}(X_i,1)$
-		\item 再预测它在 control 下的结局 $\hat{\tau}_{\text{N-OI}}(X_i,0)$
-		\item 两者相减，得到该个体的估计处理效应
-		\item 再对所有个体平均，得到 ATE
-	\end{itemize}
-
-	\begin{alertblock}{和 NATURAL IPW 的区别}
-		\begin{itemize}
-			\item NATURAL IPW 重点估计的是倾向得分：$e(x)=P(T=1 \mid X=x)$
-			\item NATURAL OI 重点估计的是结局模型：$P(Y=1 \mid X=x,T=t)$
-			\item 前者通过重新加权消除偏差，后者通过补全反事实来估计效应
+	\vspace{1.2em}
+	\begin{block}{NATURAL IPW \textit{vs.}\ NATURAL OI}
+		\begin{itemize}\itemsep0.3em
+			\item \textbf{NATURAL IPW}：重点估计倾向得分 $e(x)$，通过加权校正选择偏差
+			\item \textbf{NATURAL OI}：重点估计结局模型 $P(Y\!=\!1 \mid X\!=\!x,T\!=\!t)$，直接预测反事实结局
 		\end{itemize}
-	\end{alertblock}
+	\end{block}
 \end{frame}
 
 \begin{frame}
 	\frametitle{理论方法：NATURAL Monte Carlo（纯采样版本）}
 	\small
+
 	\begin{block}{核心思想}
-		NATURAL Monte Carlo 进一步减少解析计算，直接对每份报告 $R_i$ 从条件分布
-		\[
-		P(X,T,Y \mid R_i)
-		\]
-		中采样一个完整样本 $(X_i,T_i,Y_i)$。
+		直接对每份报告 $R_i$ 从 $P(X,T,Y \mid R_i)$ 中采样完整样本 $(X_i,T_i,Y_i)$，得到合成表格数据集 $\{(X_i,T_i,Y_i)\}_{i=1}^{n}$，再套用标准 ATE 估计器（代入 IPW $\to$ N-MC IPW；代入 OI $\to$ N-MC OI）。
 	\end{block}
 
-	\begin{itemize}
-		\item 不再枚举所有可能的 $(X,T,Y)$
-		\item 也不再只对部分变量采样、其余变量做条件期望
-		\item 而是直接按概率随机生成一条完整的伪表格记录 $(X_i,T_i,Y_i)$
-	\end{itemize}
-
-	\begin{block}{得到的结果}
-		对所有报告都这样做后，就得到一个合成表格数据集
-		\[
-		\{(X_i,T_i,Y_i)\}_{i=1}^{n}
-		\]
-	\end{block}
-\end{frame}
-
-\begin{frame}
-	\frametitle{理论方法：NATURAL Monte Carlo 的作用与定位}
-	\footnotesize
-	\begin{itemize}
-		\item 有了合成表格数据集后，就可以直接套用标准 ATE 估计器
-		\item 如果代入 IPW，就得到 N-MC IPW
-		\item 如果代入 OI，就得到 N-MC OI
-	\end{itemize}
-
-	\begin{exampleblock}{直观理解}
-		NATURAL Monte Carlo 就是先把文本报告翻译为表格数据，再用普通因果推理方法估计 ATE。
-	\end{exampleblock}
-
+	\vspace{0.4em}
 	\begin{block}{与前面方法的区别}
-		\begin{itemize}
+		\begin{itemize}\itemsep0.3em
 			\item NATURAL Full：对 $(X,T,Y)$ 全部枚举
 			\item NATURAL IPW：只对 $X$ 采样
 			\item NATURAL OI：对 $(X,T)$ 采样
-			\item NATURAL Monte Carlo：对 $(X,T,Y)$ 全部采样
+			\item \textbf{NATURAL Monte Carlo：对 $(X,T,Y)$ 全部采样}
 		\end{itemize}
 	\end{block}
 
+	\vspace{0.4em}
 	\begin{alertblock}{优点与代价}
-		优点是实现简单、计算更省；代价是会引入更多 Monte Carlo 随机误差。
+		实现简单、计算更省；代价是引入更多 Monte Carlo 随机误差。
 	\end{alertblock}
 \end{frame}
 
 \begin{frame}
 	\frametitle{理论方法：基于 Inclusion Criteria 的条件 ATE}
-	\small
-	\begin{block}{条件 ATE 的定义}
-		前面讨论的是总体 ATE，这里讨论的是某个子人群上的 ATE。设 $\mathcal{I}$ 表示由治疗前协变量 $X$ 定义的纳入标准（inclusion criteria），则
-		\[
-		\tau(\mathcal{I})=\mathbb{E}[Y(1)-Y(0)\mid X \in \mathcal{I}]
-		\]
-	\end{block}
+	\scriptsize
 
-	\begin{itemize}
-		\item 也就是：只在满足纳入标准 $X \in \mathcal{I}$ 的人群中，计算平均处理效应
-		\item 例如，只研究某一特定年龄段、病情阶段或基线条件的人群
-	\end{itemize}
-\end{frame}
+	\textcolor{structure}{\textbf{Step 1\quad 条件 ATE 的定义}}
+	\vspace{0.1em}
 
-\begin{frame}
-	\frametitle{理论方法：条件 ATE 的作者写法与直观解释}
-	\footnotesize
-	\begin{block}{作者的写法}
-		\[
-		\tau(\mathcal{I})
-		=
-		\mathbb{E}_R
-		\left[
-		\frac{P(X \in \mathcal{I}\mid R)}{P(X \in \mathcal{I})}
-		\mathbb{E}_{X,T,Y}
-		\left[
-		\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}
-		\Big| X \in \mathcal{I},R
-		\right]
-		\right]
-		\]
-	\end{block}
+	设 $\mathcal{I}$ 为由协变量 $X$ 定义的纳入标准，只在满足 $X \in \mathcal{I}$ 的子人群中计算处理效应：
+	\[
+	\tau(\mathcal{I})=\mathbb{E}[Y(1)-Y(0)\mid X \in \mathcal{I}]
+	\]
 
-	\begin{itemize}
-		\item 先看一份报告 $R$
-		\item 判断这份报告对应的人有多大概率满足纳入标准，即 $P(X \in \mathcal{I}\mid R)$
-		\item 如果一份报告更像目标子人群，它就应该有更大的权重
-		\item 然后只在 $X \in \mathcal{I}$ 的前提下，计算其 IPW 贡献
-		\item 最后对所有报告加权平均，得到条件 ATE
-	\end{itemize}
+	\vspace{0.2em}
+	\textcolor{structure}{\textbf{Step 2\quad 作者的改写}} \hfill
+	{\scriptsize 权重 $\frac{P(X \in \mathcal{I}\mid R)}{P(X \in \mathcal{I})}$：报告有多像目标子人群}
 
-	\begin{exampleblock}{关键权重的含义}
-		\[
-		\frac{P(X \in \mathcal{I}\mid R)}{P(X \in \mathcal{I})}
-		\]
-		可以理解为：这份报告相对于总体平均水平，有多像我们关心的那类人。
-	\end{exampleblock}
-\end{frame}
+	\vspace{0.1em}
+	\[
+	\tau(\mathcal{I})
+	=
+	\mathbb{E}_R
+	\left[
+	\frac{P(X \in \mathcal{I}\mid R)}{P(X \in \mathcal{I})}
+	\mathbb{E}_{X,T,Y}
+	\!\left[
+	\frac{TY}{e(X)}-\frac{(1\!-\!T)Y}{1-e(X)}
+	\;\Big|\; X \in \mathcal{I},R
+	\right]
+	\right]
+	\]
 
-\begin{frame}
-	\frametitle{理论方法：条件版 NATURAL IPW 估计量}
-	\footnotesize
-	\begin{block}{条件版 NATURAL IPW 估计量}
-		\[
-		\hat{\tau}(\mathcal{I})
-		=
-		\sum_{i=1}^{n}
-		\frac{P(X \in \mathcal{I}\mid R_i)}{\sum_{i=1}^{n}P(X \in \mathcal{I}\mid R_i)}
-		\sum_{j=1}^{m}\frac{1}{m}
-		\mathbb{E}_{T,Y\mid X_{ij},R_i}
-		\left[
-		\frac{TY}{e(X_{ij})}-\frac{(1-T)Y}{1-e(X_{ij})}
-		\right]
-		\]
-		\end{block}
+	\vspace{0.2em}
+	\textcolor{structure}{\textbf{Step 3\quad 条件版 NATURAL IPW 估计量}}
+	\vspace{0.1em}
 
-	\begin{itemize}
-		\item 先过滤掉那些不可能满足纳入标准的报告，即 $P(X \in \mathcal{I}\mid R_i)=0$
-		\item 对剩余报告，只从满足纳入标准的条件分布 $P(X \mid R_i, X \in \mathcal{I})$ 中采样 $X_{ij}$
-		\item 再按报告属于目标子人群的可能性 $P(X \in \mathcal{I}\mid R_i)$ 加权
-		\item 实践中作者取 $m=1$，即每份报告只采样一次
+	\[
+	\hat{\tau}(\mathcal{I})
+	=
+	\sum_{i=1}^{n}
+	\frac{P(X \in \mathcal{I}\mid R_i)}{\sum_{i=1}^{n}P(X \in \mathcal{I}\mid R_i)}
+	\sum_{j=1}^{m}\frac{1}{m}\,
+	\mathbb{E}_{T,Y\mid X_{ij},R_i}
+	\!\left[
+	\frac{TY}{e(X_{ij})}-\frac{(1\!-\!T)Y}{1-e(X_{ij})}
+	\right]
+	\]
+	\vspace{-0.3em}
+	\begin{itemize}\itemsep0.1em
+		\item 过滤 $P(X \in \mathcal{I}\mid R_i)=0$ 的报告；剩余报告从 $P(X \mid R_i, X \in \mathcal{I})$ 采样 $X_{ij}$
+		\item 按 $P(X \in \mathcal{I}\mid R_i)$ 加权；实践中 $m=1$，每份报告只采样一次
 	\end{itemize}
 \end{frame}
 
