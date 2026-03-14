@@ -509,77 +509,67 @@
 \begin{frame}
 	\frametitle{理论方法：NATURAL IPW（混合版本）}
 	\scriptsize
+
+	\textcolor{structure}{\textbf{Step 1\quad 核心公式}} \hfill
+	\textcolor{structure}{\textbf{Step 2\quad 倾向得分估计}}
+
+	\vspace{0.2em}
 	\begin{columns}[T,onlytextwidth]
 		\begin{column}{0.50\textwidth}
-			\textbf{核心公式}
 			\[
 			\resizebox{0.94\textwidth}{!}{$
 			\tau
 			=
 			\mathbb{E}_{R,X}
-			\left[
-			\mathbb{E}_{T,Y \mid R,X}
-			\left[
-			\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}
+			\!\left[
+			\mathbb{E}_{T,Y|R,X}
+			\!\left[
+			\frac{TY}{e(X)}-\frac{(1\!-\!T)Y}{1-e(X)}
 			\right]
 			\right]
 			$}
 			\]
+			\vspace{-0.6em}
+			\begin{itemize}\itemsep0.1em
+				\item 对每份报告 $R_i$，从 $P(X \mid R_i)$ 中采样 $X_i$
+				\item 根据 $P(T,Y \mid R_i,X_i)$ 计算 IPW 贡献
+				\item 只对 $X$ 采样，比 NATURAL Full 更省
+			\end{itemize}
 		\end{column}
 		\begin{column}{0.48\textwidth}
-			\textbf{倾向得分估计}
 			\[
 			\resizebox{0.96\textwidth}{!}{$
 			\hat{e}_{\text{N-IPW}}(x)
 			=
-			\frac{\sum_{i=1}^{n}P(T=1 \mid R_i,X_i)\mathbb{I}(X_i=x)}
-			{\sum_{i=1}^{n}\mathbb{I}(X_i=x)}
+			\frac{\sum_{i=1}^{n}P(T\!=\!1 \mid R_i,X_i)\,\mathbb{I}(X_i\!=\!x)}
+			{\sum_{i=1}^{n}\mathbb{I}(X_i\!=\!x)}
 			$}
 			\]
-		\end{column}
-	\end{columns}
-
-	\vspace{0.15em}
-	\begin{columns}[T,onlytextwidth]
-		\begin{column}{0.50\textwidth}
-			\textbf{公式讲解}
-			\begin{itemize}\itemsep0.12em
-				\item 先对每份报告 $R_i$ 从 $P(X \mid R_i)$ 中采样一个 $X_i$
-				\item 得到增广数据 $(R_i,X_i)$
-				\item 再根据 $P(T,Y \mid R_i,X_i)$ 计算该样本的平均 IPW 贡献
-				\item 与 NATURAL Full 相比，它只对 $X$ 采样，因此计算更省
-			\end{itemize}
-		\end{column}
-		\begin{column}{0.48\textwidth}
-			\textbf{公式讲解}\par
-			\begin{itemize}\itemsep0.12em
-				\item 把所有满足 $X_i=x$ 的样本治疗概率 $P(T=1 \mid R_i,X_i)$ 取平均，作为 $e(x)$ 的估计。
+			\vspace{-0.6em}
+			\begin{itemize}\itemsep0.1em
+				\item 满足 $X_i\!=\!x$ 的样本治疗概率取平均
+				\item 作为倾向得分 $e(x)$ 的估计
 			\end{itemize}
 		\end{column}
 	\end{columns}
 
-	\vspace{0.15em}
-	\textbf{ATE 估计量}
+	\vspace{0.3em}
+	\textcolor{structure}{\textbf{Step 3\quad ATE 估计量}}
+	\vspace{0.1em}
 	\[
-	\resizebox{0.96\textwidth}{!}{$
 	\hat{\tau}_{\text{N-IPW}}
 	=
 	\frac{1}{n}\sum_{i=1}^{n}\sum_{t,y}
-	P(T=t,Y=y \mid R_i,X_i)
+	P(T\!=\!t,Y\!=\!y \mid R_i,X_i)
 	\left[
 	\frac{ty}{\hat{e}_{\text{N-IPW}}(X_i)}
 	-
-	\frac{(1-t)y}{1-\hat{e}_{\text{N-IPW}}(X_i)}
+	\frac{(1\!-\!t)y}{1-\hat{e}_{\text{N-IPW}}(X_i)}
 	\right]
-	$}
 	\]
-
-	\vspace{-0.25em}
-	\textbf{公式讲解}
-	\begin{itemize}\itemsep0.12em
-		\item 对每份报告，只随机补一个 $X_i$
-		\item 对 $T,Y$ 的 4 种可能情况按条件概率加权
-		\item 最后对所有样本平均，得到 ATE 估计
+	\vspace{-0.4em}
+	\begin{itemize}\itemsep0.1em
+		\item 对每份报告只随机补一个 $X_i$，对 $T,Y$ 的 4 种情况按条件概率加权，所有样本平均 $\to$ ATE
 	\end{itemize}
 \end{frame}
 
