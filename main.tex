@@ -672,128 +672,77 @@
 \begin{frame}
 	\frametitle{理论方法：NATURAL Monte Carlo（纯采样版本）}
 	\small
+
 	\begin{block}{核心思想}
-		NATURAL Monte Carlo 进一步减少解析计算，直接对每份报告 $R_i$ 从条件分布
-		\[
-		P(X,T,Y \mid R_i)
-		\]
-		中采样一个完整样本 $(X_i,T_i,Y_i)$。
+		直接对每份报告 $R_i$ 从 $P(X,T,Y \mid R_i)$ 中采样完整样本 $(X_i,T_i,Y_i)$，得到合成表格数据集 $\{(X_i,T_i,Y_i)\}_{i=1}^{n}$，再套用标准 ATE 估计器（代入 IPW $\to$ N-MC IPW；代入 OI $\to$ N-MC OI）。
 	\end{block}
 
-	\begin{itemize}
-		\item 不再枚举所有可能的 $(X,T,Y)$
-		\item 也不再只对部分变量采样、其余变量做条件期望
-		\item 而是直接按概率随机生成一条完整的伪表格记录 $(X_i,T_i,Y_i)$
-	\end{itemize}
-
-	\begin{block}{得到的结果}
-		对所有报告都这样做后，就得到一个合成表格数据集
-		\[
-		\{(X_i,T_i,Y_i)\}_{i=1}^{n}
-		\]
-	\end{block}
-\end{frame}
-
-\begin{frame}
-	\frametitle{理论方法：NATURAL Monte Carlo 的作用与定位}
-	\footnotesize
-	\begin{itemize}
-		\item 有了合成表格数据集后，就可以直接套用标准 ATE 估计器
-		\item 如果代入 IPW，就得到 N-MC IPW
-		\item 如果代入 OI，就得到 N-MC OI
-	\end{itemize}
-
-	\begin{exampleblock}{直观理解}
-		NATURAL Monte Carlo 就是先把文本报告翻译为表格数据，再用普通因果推理方法估计 ATE。
-	\end{exampleblock}
-
+	\vspace{0.4em}
 	\begin{block}{与前面方法的区别}
-		\begin{itemize}
+		\begin{itemize}\itemsep0.3em
 			\item NATURAL Full：对 $(X,T,Y)$ 全部枚举
 			\item NATURAL IPW：只对 $X$ 采样
 			\item NATURAL OI：对 $(X,T)$ 采样
-			\item NATURAL Monte Carlo：对 $(X,T,Y)$ 全部采样
+			\item \textbf{NATURAL Monte Carlo：对 $(X,T,Y)$ 全部采样}
 		\end{itemize}
 	\end{block}
 
+	\vspace{0.4em}
 	\begin{alertblock}{优点与代价}
-		优点是实现简单、计算更省；代价是会引入更多 Monte Carlo 随机误差。
+		实现简单、计算更省；代价是引入更多 Monte Carlo 随机误差。
 	\end{alertblock}
 \end{frame}
 
 \begin{frame}
 	\frametitle{理论方法：基于 Inclusion Criteria 的条件 ATE}
-	\small
-	\begin{block}{条件 ATE 的定义}
-		前面讨论的是总体 ATE，这里讨论的是某个子人群上的 ATE。设 $\mathcal{I}$ 表示由治疗前协变量 $X$ 定义的纳入标准（inclusion criteria），则
-		\[
-		\tau(\mathcal{I})=\mathbb{E}[Y(1)-Y(0)\mid X \in \mathcal{I}]
-		\]
-	\end{block}
+	\scriptsize
 
-	\begin{itemize}
-		\item 也就是：只在满足纳入标准 $X \in \mathcal{I}$ 的人群中，计算平均处理效应
-		\item 例如，只研究某一特定年龄段、病情阶段或基线条件的人群
-	\end{itemize}
-\end{frame}
+	\textcolor{structure}{\textbf{Step 1\quad 条件 ATE 的定义}}
+	\vspace{0.1em}
 
-\begin{frame}
-	\frametitle{理论方法：条件 ATE 的作者写法与直观解释}
-	\footnotesize
-	\begin{block}{作者的写法}
-		\[
-		\tau(\mathcal{I})
-		=
-		\mathbb{E}_R
-		\left[
-		\frac{P(X \in \mathcal{I}\mid R)}{P(X \in \mathcal{I})}
-		\mathbb{E}_{X,T,Y}
-		\left[
-		\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}
-		\Big| X \in \mathcal{I},R
-		\right]
-		\right]
-		\]
-	\end{block}
+	设 $\mathcal{I}$ 为由协变量 $X$ 定义的纳入标准，只在满足 $X \in \mathcal{I}$ 的子人群中计算处理效应：
+	\[
+	\tau(\mathcal{I})=\mathbb{E}[Y(1)-Y(0)\mid X \in \mathcal{I}]
+	\]
 
-	\begin{itemize}
-		\item 先看一份报告 $R$
-		\item 判断这份报告对应的人有多大概率满足纳入标准，即 $P(X \in \mathcal{I}\mid R)$
-		\item 如果一份报告更像目标子人群，它就应该有更大的权重
-		\item 然后只在 $X \in \mathcal{I}$ 的前提下，计算其 IPW 贡献
-		\item 最后对所有报告加权平均，得到条件 ATE
-	\end{itemize}
+	\vspace{0.2em}
+	\textcolor{structure}{\textbf{Step 2\quad 作者的改写}} \hfill
+	{\scriptsize 权重 $\frac{P(X \in \mathcal{I}\mid R)}{P(X \in \mathcal{I})}$：报告有多像目标子人群}
 
-	\begin{exampleblock}{关键权重的含义}
-		\[
-		\frac{P(X \in \mathcal{I}\mid R)}{P(X \in \mathcal{I})}
-		\]
-		可以理解为：这份报告相对于总体平均水平，有多像我们关心的那类人。
-	\end{exampleblock}
-\end{frame}
+	\vspace{0.1em}
+	\[
+	\tau(\mathcal{I})
+	=
+	\mathbb{E}_R
+	\left[
+	\frac{P(X \in \mathcal{I}\mid R)}{P(X \in \mathcal{I})}
+	\mathbb{E}_{X,T,Y}
+	\!\left[
+	\frac{TY}{e(X)}-\frac{(1\!-\!T)Y}{1-e(X)}
+	\;\Big|\; X \in \mathcal{I},R
+	\right]
+	\right]
+	\]
 
-\begin{frame}
-	\frametitle{理论方法：条件版 NATURAL IPW 估计量}
-	\footnotesize
-	\begin{block}{条件版 NATURAL IPW 估计量}
-		\[
-		\hat{\tau}(\mathcal{I})
-		=
-		\sum_{i=1}^{n}
-		\frac{P(X \in \mathcal{I}\mid R_i)}{\sum_{i=1}^{n}P(X \in \mathcal{I}\mid R_i)}
-		\sum_{j=1}^{m}\frac{1}{m}
-		\mathbb{E}_{T,Y\mid X_{ij},R_i}
-		\left[
-		\frac{TY}{e(X_{ij})}-\frac{(1-T)Y}{1-e(X_{ij})}
-		\right]
-		\]
-		\end{block}
+	\vspace{0.2em}
+	\textcolor{structure}{\textbf{Step 3\quad 条件版 NATURAL IPW 估计量}}
+	\vspace{0.1em}
 
-	\begin{itemize}
-		\item 先过滤掉那些不可能满足纳入标准的报告，即 $P(X \in \mathcal{I}\mid R_i)=0$
-		\item 对剩余报告，只从满足纳入标准的条件分布 $P(X \mid R_i, X \in \mathcal{I})$ 中采样 $X_{ij}$
-		\item 再按报告属于目标子人群的可能性 $P(X \in \mathcal{I}\mid R_i)$ 加权
-		\item 实践中作者取 $m=1$，即每份报告只采样一次
+	\[
+	\hat{\tau}(\mathcal{I})
+	=
+	\sum_{i=1}^{n}
+	\frac{P(X \in \mathcal{I}\mid R_i)}{\sum_{i=1}^{n}P(X \in \mathcal{I}\mid R_i)}
+	\sum_{j=1}^{m}\frac{1}{m}\,
+	\mathbb{E}_{T,Y\mid X_{ij},R_i}
+	\!\left[
+	\frac{TY}{e(X_{ij})}-\frac{(1\!-\!T)Y}{1-e(X_{ij})}
+	\right]
+	\]
+	\vspace{-0.3em}
+	\begin{itemize}\itemsep0.1em
+		\item 过滤 $P(X \in \mathcal{I}\mid R_i)=0$ 的报告；剩余报告从 $P(X \mid R_i, X \in \mathcal{I})$ 采样 $X_{ij}$
+		\item 按 $P(X \in \mathcal{I}\mid R_i)$ 加权；实践中 $m=1$，每份报告只采样一次
 	\end{itemize}
 \end{frame}
 
