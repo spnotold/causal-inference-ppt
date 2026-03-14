@@ -452,58 +452,58 @@
 
 \begin{frame}
 	\frametitle{理论方法：NATURAL Full（理想化版本）}
-	\small
-	\begin{block}{基本设定}
+	\scriptsize
+	\begin{block}{基本设定与核心恒等式}
 		给定报告样本 $\{R_i\}_{i=1}^n$ 和条件分布 $P(X=x,T=t,Y=y \mid R=r)$，
 		作者构造 NATURAL 的理想化估计器。
-	\end{block}
-
-	\begin{block}{核心恒等式}
 		\[
-		\begin{aligned}
+		\resizebox{0.96\textwidth}{!}{$
 		\tau
-		&= \mathbb{E}_{X,T,Y}\left[\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}\right] \\
-		&= \mathbb{E}_R\left[\mathbb{E}_{X,T,Y \mid R}\left[\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}\right]\right]
-		\end{aligned}
+		= \mathbb{E}_{X,T,Y}\left[\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}\right]
+		= \mathbb{E}_R\left[\mathbb{E}_{X,T,Y \mid R}\left[\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}\right]\right]
+		$}
 		\]
 	\end{block}
 
 	\begin{itemize}
-		\item 这一步本质上是把原来的 IPW 表达式，改写成先对报告 $R$ 条件化，再对报告取平均
-		\item 可以先固定一份报告 $R$，计算该报告下隐含的 $(X,T,Y)$ 的平均 IPW 值
-		\item 再对所有报告取平均，就得到整体的 ATE
-	\end{itemize}
-\end{frame}
-
-\begin{frame}
-	\frametitle{理论方法：NATURAL Full 的 Monte Carlo 估计}
-	\small
-	\begin{block}{估计量}
-		\[
-		\hat{\tau}_{\text{N-Full}}
-		=
-		\frac{1}{n}\sum_{i=1}^{n}\sum_{x,t,y}
-		P(X=x,T=t,Y=y \mid R_i)
-		\left[
-		\frac{ty}{\hat{e}_{\text{N-Full}}(x)}
-		-
-		\frac{(1-t)y}{1-\hat{e}_{\text{N-Full}}(x)}
-		\right]
-		\]
-	\end{block}
-
-	\begin{itemize}
-		\item 对每份报告 $R_i$，枚举所有可能的 $(x,t,y)$
-		\item 用 $P(X,T,Y \mid R_i)$ 作为权重，计算该报告的期望 IPW 贡献
-		\item 再对所有报告平均，得到 ATE 的估计
+		\item 本质上是把原来的 IPW 表达式改写成：先对报告 $R$ 条件化，再对报告取平均
+		\item 也就是先固定一份报告 $R$，计算该报告下隐含的 $(X,T,Y)$ 的平均 IPW 值；再对所有报告取平均
 	\end{itemize}
 
-	\begin{alertblock}{为什么说它是理想化版本}
-		\begin{itemize}
-			\item 它要求我们知道完整的 $P(X,T,Y \mid R)$
-			\item 当协变量 $X$ 维度很高时，需要枚举所有 $(x,t,y)$，计算开销会很大
-		\end{itemize}
-	\end{alertblock}
+	\vspace{-0.3em}
+	\begin{columns}[T,onlytextwidth]
+		\begin{column}{0.64\textwidth}
+			\begin{block}{Monte Carlo 估计量}
+				\[
+				\resizebox{\textwidth}{!}{$
+				\hat{\tau}_{\text{N-Full}}
+				=
+				\frac{1}{n}\sum_{i=1}^{n}\sum_{x,t,y}
+				P(X=x,T=t,Y=y \mid R_i)
+				\left[
+				\frac{ty}{\hat{e}_{\text{N-Full}}(x)}
+				-
+				\frac{(1-t)y}{1-\hat{e}_{\text{N-Full}}(x)}
+				\right]
+				$}
+				\]
+			\end{block}
+
+			\vspace{-0.5em}
+			\begin{itemize}
+				\item 对每份报告枚举所有可能的 $(x,t,y)$，并用 $P(X,T,Y \mid R_i)$ 作为权重
+				\item 由此得到该报告的期望 IPW 贡献；再对所有报告平均，就得到 ATE 的估计
+			\end{itemize}
+		\end{column}
+		\begin{column}{0.34\textwidth}
+			\begin{alertblock}{为什么说它是理想化版本}
+				\begin{itemize}
+					\item 需要知道完整的 $P(X,T,Y \mid R)$
+					\item 当协变量 $X$ 维度很高时，需要枚举所有 $(x,t,y)$，计算开销会很大
+				\end{itemize}
+			\end{alertblock}
+		\end{column}
+	\end{columns}
 \end{frame}
 
 \begin{frame}
