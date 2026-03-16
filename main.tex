@@ -969,16 +969,16 @@
 \begin{frame}
 	\frametitle{挑战：非结构化自我报告数据带来的三类问题}
 	\small
-	\begin{block}{1. 网络干扰（Network Interference）}
+	\begin{block}{1. 个体间相互影响}
 		要获得 i.i.d. 报告并不容易。在线论坛用户可能彼此交流，并影响对方的 treatment 选择，这会破坏独立性假设。
 	\end{block}
 
-	\begin{block}{2. 结局测量（Outcome Measurement）}
+	\begin{block}{2. 结局测量}
 		NATURAL 依赖自我报告，所以用户必须能够报告感兴趣的 outcome。
 		如果结局只能靠昂贵或不可获得的测试测量，这种方法就不适用。
 	\end{block}
 
-	\begin{block}{3. 选择偏差（Selection Bias）}
+	\begin{block}{3. 选择偏差}
 		愿意发帖报告的人本身可能就不是随机的：
 		\begin{itemize}
 			\item 个体是否报告，可能受 treatment 体验影响
@@ -994,44 +994,44 @@
 \begin{frame}
 	\frametitle{实验：评估端到端框架的挑战与数据集构建}
 	\footnotesize
-	评估基于非结构化文本的因果推断，最大阻碍在于\textbf{极难获取真实的干预效应标签（Ground Truth）}。为此，作者构建了 6 个特殊的数据集：
+	评估基于非结构化文本的因果推断，最大阻碍在于\textbf{极难获取真实的干预效应标签}。为此，作者构建了 6 个特殊的数据集：
 	
-	\begin{block}{2 个合成数据集 (Synthetic Datasets)}
-		基于真实表格数据（Hillstrom 营销、Retail Hero 促销）生成：
+	\begin{block}{2 个合成数据集}
+		基于真实表格数据（营销、促销）生成：
 		\begin{itemize}
 			\item \textbf{引入混杂与文本化}：按人工倾向得分对样本非均匀子采样引入混杂；随后赋予样本“大五人格”，通过 LLM 生成逼真的自述文本。
 		\end{itemize}
 	\end{block}
-	\begin{block}{4 个真实世界临床数据集 (Real-world Datasets)：严格对齐 RCT}
+	\begin{block}{4 个真实世界临床数据集：严格对齐 RCT}
 		从 Reddit 提取患者自述，并以\textbf{三/四期真实临床对照试验 (RCTs)} 作为金标准。
 		\begin{itemize}
 			\item \textbf{控制选择偏差}：特意选取“可用性极相似”的药物对照，缓解发帖意愿差异。
-			\item \textbf{纳入标准对齐 (Inclusion Criteria)}：\textcolor{red}{利用 LLM 严格过滤文本，确保提取的网民群体在特征上（如是否确诊、年龄、BMI）与真实 RCT 的受试人群画像完全一致}。
+			\item \textbf{纳入标准对齐}：\textcolor{red}{利用 LLM 严格过滤文本，确保提取的网民群体在特征上（如是否确诊、年龄、BMI）与真实 RCT 的受试人群画像完全一致}。
 		\end{itemize}
 	\end{block}
 \end{frame}
 
 \begin{frame}
-	\frametitle{实验：极为严谨的机器学习评估设定 (Tuned vs. Held-out)}
+	\frametitle{实验：严谨的机器学习评估设定}
 	\footnotesize
 	为防止“提示词工程”带来的数据泄露或过拟合，作者采用了极其严谨的划分：
 	
 	\begin{columns}[T]
 	    \begin{column}{0.48\textwidth}
-	        \begin{block}{1 个调优集 (Tuned Dataset)}
+	        \begin{block}{1 个调优集}
 	            \textbf{设定}：Semaglutide vs. Tirzepatide (减肥药)
 	            \begin{itemize}
 	                \item 允许在此数据集上观察 RCT 的 Ground Truth。
-	                \item 用于确定 Pipeline 的所有决策：过滤策略、提示词 (Prompt) 调优、连续变量（如体重、BMI）的区间离散化策略。
+	                \item 用于确定 Pipeline 的所有决策：过滤策略、提示词调优、连续变量（如体重、BMI）的区间离散化策略。
 	            \end{itemize}
 	        \end{block}
 	    \end{column}
 	    
 	    \begin{column}{0.48\textwidth}
-	        \begin{exampleblock}{3 个保留测试集 (Held-out Datasets)}
+	        \begin{exampleblock}{3 个保留测试集}
 	            \textbf{设定}：其余 3 组（减肥药及偏头痛药物）
 	            \begin{itemize}
-	                \item \textbf{完全盲测 (Zero-shot)}。
+	                \item \textbf{完全盲测}。
 	                \item 冻结在调优集上固定的所有代码和决策，直接应用于这 3 个全新场景。
 	                \item 以此证明框架具有泛化能力，而非“特调的巧合”。
 	            \end{itemize}
@@ -1044,7 +1044,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{实验：核心表现（惊人的临床级预测精度）}
+	\frametitle{实验：核心表现（出色的临床级预测精度）}
 	\footnotesize
 	
 	% 请确保已将论文中的 Table 2 截图保存为 figures/table2.png
@@ -1055,8 +1055,8 @@
 	\begin{alertblock}{端到端结果揭晓}
 		\begin{itemize}
 			\item \textbf{极高的精度}：在所有 3 个保留测试集上，表现最佳的 NATURAL 估计器预测的 ATE，与真实临床试验 ATE 的\textbf{绝对误差全部控制在 3 个百分点以内}！
-			\item \textbf{正确的效应方向}：100\%精准预判了所有疗效优劣的“方向”。
-			\item \textbf{逼近“神谕”}：在合成数据中，NATURAL 不仅击败了有监督的文本基线，其表现甚至逼近了能够看到全部底层结构化表格的“Oracle (IPW Structured)”基线。
+			\item \textbf{正确的效应方向}：100\%精准预判了所有疗效优劣的方向。
+			\item \textbf{接近“绝对正确的基线”}：在合成数据中，NATURAL 不仅击败了有监督的文本基线，其表现甚至逼近了能够看到全部底层结构化表格的“Oracle (IPW Structured)”基线。
 		\end{itemize}
 	\end{alertblock}
 \end{frame}
@@ -1075,7 +1075,7 @@
 				\vspace{0.1cm}
 				\begin{itemize}
 					\item 在合成数据中，可以观测真实的联合分布和倾向得分。
-					\item \textbf{左图结论}：随着推断使用的报告数量增加，LLM 估计分布与真实分布之间的 \textbf{KL 散度}稳步下降。且 ATE 的预测误差（RMSE）也随之完美下降。
+					\item \textbf{左图结论}：随着推断使用的报告数量增加，LLM 估计分布与真实分布之间的 \textbf{KL 散度}稳步下降。且 ATE 的预测误差也随之完美下降。
 				\end{itemize}
 			\end{block}
 		\end{column}
@@ -1095,7 +1095,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{实验：消融实验与大模型“规模涌现”的红利}
+	\frametitle{实验：消融实验与大模型“规模涌现”的正向影响}
 	\footnotesize
 	在减肥药数据集上，作者通过消融实验验证了流水线关键步骤与 LLM 参数规模的影响。
 
@@ -1113,7 +1113,7 @@
 			\end{block}
 		\end{column}
 		\begin{column}{0.48\textwidth}
-			\begin{block}{大模型规模（Scale）对推断精度的影响}
+			\begin{block}{大模型规模对推断精度的影响}
 				\begin{itemize}
 					\item 实验对比了 Uniform 分布、LLaMA2-7B、13B 和 70B 作为条件概率生成器的效果。
 					\item \textbf{大力出奇迹}：参数量越大的 LLM，其输出的条件概率校准度越高，最终推断的 ATE 误差也越小。
@@ -1125,9 +1125,9 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{实验：对未观测混杂的鲁棒性分析 (Sensitivity Analysis)}
+	\frametitle{实验：对未观测混杂的鲁棒性分析}
 	\footnotesize
-	任何仅基于观察数据的研究都面临着“存在未观测混杂因素 (Unobserved Confounding)”的天然质疑。作者引入敏感性分析来考察模型的稳健程度。
+	任何仅基于观察数据的研究都面临着“存在未观测混杂因素”的天然质疑。作者引入敏感性分析来考察模型的稳健程度。
 
 	\begin{columns}[T]
 	    \begin{column}{0.55\textwidth}
@@ -1137,7 +1137,7 @@
         	\begin{alertblock}{实验结论}
         		\begin{itemize}
         			\item 结果显示，NATURAL IPW 在大多数测试集上展现出极高的鲁棒性。
-        			\item \textbf{这意味着}：必须存在极其强烈且完全没有在文本中泄露一丝蛛丝马迹的“幽灵”混杂因子，才可能颠覆当前的结论方向。这在真实的医疗自述反馈中是较难发生的。
+        			\item \textbf{这意味着}：必须存在极其强烈且完全没有在文本中泄露一丝蛛丝马迹的隐藏混杂因子，才可能颠覆当前的结论方向。这在真实的医疗自述反馈中是较难发生的。
         		\end{itemize}
         	\end{alertblock}
 	    \end{column}
@@ -1162,15 +1162,15 @@
 
 	\begin{block}{方法层面的理论隐患}
 		\begin{itemize}
-			\item \textbf{大模型条件概率的不可验证性与对齐税}：NATURAL 强依赖于 LLM 给出准确的概率分布。然而，经过人类反馈强化学习（RLHF）“对齐”后的大模型，其输出概率往往发生扭曲（失真）。模型是否还能代表真实世界的统计分布？在数学上这是极难形式化验证的。
-			\item \textbf{违背 SUTVA (个体稳定干预假设)}：在线论坛中，用户发帖会互相影响、“跟风”用药，这就破坏了因果推断最基石的“个体独立同分布 (i.i.d.)” 假设。
+			\item \textbf{大模型条件概率的不可验证性与对齐税}：NATURAL 强依赖于 LLM 给出准确的概率分布。然而，经过人类反馈强化学习“对齐”后的大模型，其输出概率往往发生扭曲（失真）。模型是否还能代表真实世界的统计分布？在数学上这是极难形式化验证的。
+			\item \textbf{违背个体稳定干预假设}：在线论坛中，用户发帖会互相影响、“跟风”用药，这就破坏了因果推断最基石的“个体独立同分布” 假设。
 		\end{itemize}
 	\end{block}
 
 	\begin{block}{非结构化数据的“幸存者偏差”}
 		\begin{itemize}
 			\item \textbf{结果测量受限}：该方法仅适用于“患者可以自我感知”的终点指标（如体重、偏头痛频次）。无法替代需要精密医疗化验的复杂指标。
-			\item \textbf{选择性发帖偏差 (Selection Bias)}：在网上长篇大论的人群可能无法代表总体。更严重的是，患者往往是因为经历了“疗效奇好”或“副作用极大”才选择发帖，结果导致了极为复杂的缺失数据机制。
+			\item \textbf{选择性发帖偏差}：在网上长篇大论的人群可能无法代表总体。更严重的是，患者往往是因为经历了“疗效奇好”或“副作用极大”才选择发帖，结果导致了极为复杂的缺失数据机制。
 		\end{itemize}
 	\end{block}
 \end{frame}
@@ -1178,8 +1178,8 @@
 \begin{frame}
 	\frametitle{思考：NATURAL 的核心价值与因果范式转换}
 	
-	\begin{alertblock}{警惕：NATURAL 绝不能替代 RCT！}
-		由于上述局限性，NATURAL 绝不能直接用于高风险的公共卫生决策或临床给药。真实的随机对照试验（RCT）仍不可动摇！它的真正定位是：\textbf{因果假设极其强大的“前置筛选漏斗”}。
+	\begin{alertblock}{NATURAL 绝不能替代 RCT！}
+		由于上述局限性，NATURAL 绝不能直接用于高风险的公共卫生决策或临床给药。真实的随机对照试验仍不可动摇！它的真正定位是：\textbf{因果假设的前置筛选器}。
 	\end{alertblock}
 	\vspace{0.2cm}
 	
@@ -1209,8 +1209,8 @@
 	\footnotesize
 	\textbf{核心商业与社会落地场景}：
 	\begin{itemize}
-	    \item \textbf{老药新用 (Repurposed Drugs)}：在资金匮乏的罕见病领域，快速低成本筛选有潜力的文本疗法，决定将有限的 RCT 资金投给哪个成功率最高的假设。
-	    \item \textbf{上市后真实世界证据 (Post-marketing Surveillance)}：药物获批后，利用社交海量数据监控在小样本 RCT 中未能暴露出的长期或罕见副作用。
+	    \item \textbf{老药新用}：在资金匮乏的罕见病领域，快速低成本筛选有潜力的文本疗法，决定将有限的 RCT 资金投给哪个成功率最高的假设。
+	    \item \textbf{上市后真实世界证据}：药物获批后，利用社交海量数据监控在小样本 RCT 中未能暴露出的长期或罕见副作用。
 	\end{itemize}
 \end{frame}
 
@@ -1224,7 +1224,7 @@
 	\begin{block}{未来值得探索的研究方向}
 		\begin{itemize}
 			\item \textbf{向连续变量扩展}：目前研究局限于二元干预与二元结果，如何稳定、无偏地扩展到实数值连续型 $(X, T, Y)$ 的 ATE 估计，是一个巨大的挑战。
-			\item \textbf{自动化提示词优化 (Prompt Tuning)}：当前流水线中“纳入标准”的设定仍严重依赖人工专家微调，未来可引入自动提示词搜索以进一步减少人工成本。
+			\item \textbf{自动化提示词优化}：当前流水线中“纳入标准”的设定仍严重依赖人工专家微调，未来可引入自动提示词搜索以进一步减少人工成本。
 			\item \textbf{跨学科大挪移}：跳出医疗健康领域的限制，将 NATURAL 部署到社会科学、经济学或政治学等，任何存在海量非结构化自然语言文本的因果效应论证场景中。
 		\end{itemize}
 	\end{block}
